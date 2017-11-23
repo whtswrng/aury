@@ -1,7 +1,7 @@
 const readline = require('readline');
 const stringPainter = require('./string-painter');
 
-class TerminalQuestion {
+class Terminal {
 
     async askUser(question) {
         return new Promise((resolve, reject) => {
@@ -20,4 +20,4 @@ class TerminalQuestion {
 
 }
 
-module.exports = new TerminalQuestion();
+module.exports = new Terminal();

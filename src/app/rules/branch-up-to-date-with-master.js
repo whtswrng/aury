@@ -1,7 +1,6 @@
 const BaseRule = require('./base-rule');
 const printer = require('../services/output-printer');
-const stringPainter = require('../services/string-painter');
-const askUser = require('../services/terminal-question').askUser;
+const askUser = require('../services/terminal').askUser;
 const exec = require('../services/command-executor').exec;
 
 class BranchUpToDateWithMaster extends BaseRule {
@@ -12,15 +11,16 @@ class BranchUpToDateWithMaster extends BaseRule {
         try {
             await this.checkoutToBranch(branch);
             await this.mergeBranchToMaster(branch);
+
+            printer.ok('ᶘ   1) Branch has sucessfuly merged with master.');
         } catch (e) {
-            printer.error(e.message);
+            printer.error(`✘    1) Branch cannot be merged with master.`)
+            throw e;
         }
-        console.log('BRANCH NAME IS', branch);
     }
 
     async _getBranchFromUser() {
         const insertBranchNameString = 'Please insert branch name: ';
-
         return askUser(insertBranchNameString);
     }
 

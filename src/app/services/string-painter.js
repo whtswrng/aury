@@ -10,6 +10,7 @@ colors.setTheme({
     help: 'cyan',
     warn: 'yellow',
     debug: 'blue',
+    ok: 'green',
     error: 'red'
 });
 
@@ -21,6 +22,10 @@ class StringPainter {
 
     error(string) {
         return string.error;
+    }
+
+    ok(string) {
+        return string.ok;
     }
 
 }

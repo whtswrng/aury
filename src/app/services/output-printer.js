@@ -13,6 +13,10 @@ class ConsoleOutputPrinter {
         console.log(StringPainter.error(string))
     }
 
+    ok(string) {
+        console.log(StringPainter.ok(string));
+    }
+
 }
 
 module.exports = new ConsoleOutputPrinter();
