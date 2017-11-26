@@ -11,7 +11,7 @@ class Terminal {
                 terminal: false
             });
 
-            rl.question(stringPainter.info(question), (answer) => {
+            rl.question(stringPainter.info(question + ' '), (answer) => {
                 resolve(answer);
                 rl.close();
             });

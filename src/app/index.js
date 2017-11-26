@@ -2,6 +2,11 @@
 const fs = require('fs');
 const printer = require('./services/output-printer');
 const BranchUpToDateWithMaster = require('./rules/branch-up-to-date-with-master');
+const EnoughInformationInPullRequest = require('./rules/enough-information-in-pull-request');
+const AllPrerequisites = require('./rules/branch-meets-all-prerequisites');
+const BranchHasRequiredFunctionality = require('./rules/branch-has-required-functionality');
+const BranchHasTests = require('./rules/branch-has-tests');
+const BranchHasCleanDesignAndCode = require('./rules/branch-has-clean-design-and-code');
 
 const CONFIG_FILE_NAME = 'aury.config.json';
 
@@ -9,24 +14,50 @@ startJourney();
 
 
 async function startJourney() {
-    const branchName = await promptBranch();
-
     try {
-        await checkIfBranchIsUpToDateWithMaster(branchName);
-    } catch (e) {
-        printer.error(e.message);
-    }
-    // const rawFileData = readFile(CONFIG_FILE_NAME);
-    // const scriptToRunList = getScriptListFromRawFileData(rawFileData);
-    // console.log(scriptToRunList);
-}
+        await checkIfBranchIsUpToDateWithMaster();
+        await checkIfPullRequestHasEnoughInformation();
+        await checkIfBranchMeetsAllPrerequisites();
+        await checkIfBranchHasRequiredFunctionality();
+        await checkIfBranchHasTests();
+        await checkIfBranchHasCleanDesignAndCode();
 
-async function promptBranch() {
+        printer.ok(`Pull request was approved. Congratulations c:`);
+    } catch (e) {
+        printer.error(`Pull request was denied, because of: "${e.message}"`);
+        console.log(e);
+    }
 }
 
 async function checkIfBranchIsUpToDateWithMaster() {
     const branchUpToDateWithMaster = new BranchUpToDateWithMaster();
     return branchUpToDateWithMaster.execute();
+}
+
+async function checkIfPullRequestHasEnoughInformation() {
+    const enoughInformation = new EnoughInformationInPullRequest();
+    return enoughInformation.execute();
+}
+
+async function checkIfBranchMeetsAllPrerequisites() {
+    const fileData = await readFile(CONFIG_FILE_NAME);
+    const allPrerequisites = new AllPrerequisites(getPrerequisitedFromRawFileData(fileData));
+    return allPrerequisites.execute();
+}
+
+async function checkIfBranchHasRequiredFunctionality() {
+    const enoughInformation = new BranchHasRequiredFunctionality();
+    return enoughInformation.execute();
+}
+
+async function checkIfBranchHasTests() {
+    const enoughInformation = new BranchHasTests();
+    return enoughInformation.execute();
+}
+
+async function checkIfBranchHasCleanDesignAndCode() {
+    const enoughInformation = new BranchHasCleanDesignAndCode();
+    return enoughInformation.execute();
 }
 
 function readFile(filePath) {
@@ -37,7 +68,7 @@ function readFile(filePath) {
     });
 }
 
-function getScriptListFromRawFileData(rawFileData) {
+function getPrerequisitedFromRawFileData(rawFileData) {
     const dataInJson = JSON.parse(rawFileData);
-    return dataInJson.scripts;
+    return dataInJson.prerequisites;
 }
