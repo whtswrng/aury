@@ -6,7 +6,7 @@ class EnoughInformationInPullRequest extends BaseRule {
 
     async execute() {
         try {
-            const answer = await askUser('Has branch clean design and code?');
+            const answer = await askUser('6/6 Has branch clean design and code? (yes/no)');
 
             if(this._stripString(answer) === 'yes') {
                 return printer.ok('ᶘ   6) Branch has clean design and code.');

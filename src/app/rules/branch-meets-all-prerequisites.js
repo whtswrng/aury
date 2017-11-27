@@ -11,7 +11,7 @@ class AllPrerequisites extends BaseRule {
 
     async execute() {
         try {
-            printer.info('Check if all prerequisites are passing...');
+            printer.info('3/6 Are all prerequisites passing?');
             await this._runPrerequisites(this.prerequisites);
             printer.ok('ᶘ   3) Branch successfully meets all prerequisites.');
         } catch (e) {

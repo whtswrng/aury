@@ -6,7 +6,7 @@ class EnoughInformationInPullRequest extends BaseRule {
 
     async execute() {
         try {
-            const answer = await askUser('Has pull request enough information to understand the problem?');
+            const answer = await askUser('2/6 Has pull request enough information to understand the problem? (yes/no)');
 
             if(this._stripString(answer) === 'yes') {
                 return printer.ok('ᶘ   2) Pull request has properly described the problem.');

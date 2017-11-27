@@ -6,7 +6,7 @@ class BranchHasRequiredFunctionality extends BaseRule {
 
     async execute() {
         try {
-            const answer = await askUser('Has branch required functionality (Does the code solved the problem)?');
+            const answer = await askUser('4/6 Has branch required functionality (Does the code solved the problem)? (yes/no)');
 
             if(this._stripString(answer) === 'yes') {
                 return printer.ok('ᶘ   4) Branch has required functionality.');

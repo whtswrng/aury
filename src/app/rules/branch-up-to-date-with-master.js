@@ -6,6 +6,7 @@ const exec = require('../services/command-executor').exec;
 class BranchUpToDateWithMaster extends BaseRule {
 
     async execute() {
+        printer.info(`1/6 Can be branch properly fastforwarded with master (without conflicts)`);
         const branch = await this._getBranchFromUser();
 
         try {

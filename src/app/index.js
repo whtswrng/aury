@@ -12,7 +12,6 @@ const CONFIG_FILE_NAME = 'aury.config.json';
 
 startJourney();
 
-
 async function startJourney() {
     try {
         await checkIfBranchIsUpToDateWithMaster();
@@ -22,7 +21,7 @@ async function startJourney() {
         await checkIfBranchHasTests();
         await checkIfBranchHasCleanDesignAndCode();
 
-        printer.ok(`Pull request was approved. Congratulations c:`);
+        printer.ok(`\nPull request was approved. Congratulations c:`);
     } catch (e) {
         printer.error(`Pull request was denied, because of: "${e.message}"`);
         console.log(e);
