@@ -7,25 +7,41 @@ const AllPrerequisites = require('./rules/branch-meets-all-prerequisites');
 const BranchHasRequiredFunctionality = require('./rules/branch-has-required-functionality');
 const BranchHasTests = require('./rules/branch-has-tests');
 const BranchHasCleanDesignAndCode = require('./rules/branch-has-clean-design-and-code');
+const git = require('./services/git');
 
 const CONFIG_FILE_NAME = 'aury.config.json';
 
 startJourney();
 
 async function startJourney() {
+    const currentCommitHash = await git.getCurrentCommitHash();
+
     try {
-        await checkIfBranchIsUpToDateWithMaster();
-        await checkIfPullRequestHasEnoughInformation();
-        await checkIfBranchMeetsAllPrerequisites();
-        await checkIfBranchHasRequiredFunctionality();
-        await checkIfBranchHasTests();
-        await checkIfBranchHasCleanDesignAndCode();
+        await checkIfGitStatusIsClean();
+        await checkAllRules();
+        await restoreGitToPreviousState(currentCommitHash);
 
         printer.ok(`\nPull request was approved. Congratulations c:`);
     } catch (e) {
+        await restoreGitToPreviousState(currentCommitHash);
         printer.error(`Pull request was denied, because of: "${e.message}"`);
         console.log(e);
     }
+}
+
+async function checkIfGitStatusIsClean() {
+    if( ! await git.isGitStatusClean()) {
+        throw new Error('Git status is not clean!');
+    }
+}
+
+async function checkAllRules() {
+    await checkIfBranchIsUpToDateWithMaster();
+    await checkIfPullRequestHasEnoughInformation();
+    await checkIfBranchMeetsAllPrerequisites();
+    await checkIfBranchHasRequiredFunctionality();
+    await checkIfBranchHasTests();
+    await checkIfBranchHasCleanDesignAndCode();
 }
 
 async function checkIfBranchIsUpToDateWithMaster() {
@@ -70,4 +86,11 @@ function readFile(filePath) {
 function getPrerequisitedFromRawFileData(rawFileData) {
     const dataInJson = JSON.parse(rawFileData);
     return dataInJson.prerequisites;
+}
+
+async function restoreGitToPreviousState(commit) {
+    try {
+        await git.abortMerge();
+        await git.checkoutTo(commit);
+    } catch(e) {}
 }

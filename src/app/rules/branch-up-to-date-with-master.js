@@ -36,7 +36,7 @@ class BranchUpToDateWithMaster extends BaseRule {
 
     async mergeFastForward(to, from) {
         try {
-            await exec(`git merge origin/${to} origin/${from} --ff-only`);
+            await exec(`git merge origin/${to} origin/${from} --no-commit`);
         } catch (e) {
             console.log(e);
             throw new Error(`branch "${from}" cannot be merged with "${to}".`);
