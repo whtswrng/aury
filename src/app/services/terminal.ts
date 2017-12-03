@@ -1,9 +1,13 @@
-const readline = require('readline');
-const stringPainter = require('./string-painter');
+import * as readline from "readline";
+import {OutputUserInterface} from "./output-user-interface";
 
-class Terminal {
+export class Terminal implements OutputUserInterface{
 
-    async askUser(question) {
+    constructor(private stringPainter) {
+
+    }
+
+    public async askUser(question) {
         return new Promise((resolve, reject) => {
             const rl = readline.createInterface({
                 input: process.stdin,
@@ -11,7 +15,7 @@ class Terminal {
                 terminal: false
             });
 
-            rl.question(stringPainter.info(question + ' '), (answer) => {
+            rl.question(this.stringPainter.info(question + ' '), (answer) => {
                 resolve(answer);
                 rl.close();
             });
@@ -19,5 +23,3 @@ class Terminal {
     }
 
 }
-
-module.exports = new Terminal();

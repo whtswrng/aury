@@ -1,15 +1,19 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const printer = require('./services/output-printer');
-const BranchUpToDateWithMaster = require('./rules/branch-up-to-date-with-master');
-const EnoughInformationInPullRequest = require('./rules/enough-information-in-pull-request');
-const AllPrerequisites = require('./rules/branch-meets-all-prerequisites');
-const BranchHasRequiredFunctionality = require('./rules/branch-has-required-functionality');
-const BranchHasTests = require('./rules/branch-has-tests');
-const BranchHasCleanDesignAndCode = require('./rules/branch-has-clean-design-and-code');
-const git = require('./services/git');
+import {Git} from "./services/git";
+import {BranchHasRequiredFunctionality} from "./rules/branch-has-required-functionality";
+import {BranchHasTests} from "./rules/branch-has-tests";
+import {BranchHasCleanDesignAndCode} from "./rules/branch-has-clean-design-and-code";
+import {EnoughInformationInPullRequest} from "./rules/enough-information-in-pull-request";
+import {BranchMeetsAllPrerequisites} from "./rules/branch-meets-all-prerequisites";
+import {ConsoleOutputPrinter} from "./services/output-printer";
+import {BranchUpToDateWithMaster} from "./rules/branch-up-to-date-with-master";
+import {Terminal} from "./services/terminal";
+import {readFile} from "fs";
 
 const CONFIG_FILE_NAME = 'aury.config.json';
+const git = new Git();
+const printer = new ConsoleOutputPrinter();
+const output = new Terminal(printer);
 
 startJourney();
 
@@ -45,39 +49,39 @@ async function checkAllRules() {
 }
 
 async function checkIfBranchIsUpToDateWithMaster() {
-    const branchUpToDateWithMaster = new BranchUpToDateWithMaster();
+    const branchUpToDateWithMaster = new BranchUpToDateWithMaster(printer, output, git);
     return branchUpToDateWithMaster.execute();
 }
 
 async function checkIfPullRequestHasEnoughInformation() {
-    const enoughInformation = new EnoughInformationInPullRequest();
+    const enoughInformation = new EnoughInformationInPullRequest(printer, output);
     return enoughInformation.execute();
 }
 
 async function checkIfBranchMeetsAllPrerequisites() {
-    const fileData = await readFile(CONFIG_FILE_NAME);
-    const allPrerequisites = new AllPrerequisites(getPrerequisitedFromRawFileData(fileData));
+    const fileData = await readFilePromisified(CONFIG_FILE_NAME);
+    const allPrerequisites = new BranchMeetsAllPrerequisites(printer, getPrerequisitedFromRawFileData(fileData));
     return allPrerequisites.execute();
 }
 
 async function checkIfBranchHasRequiredFunctionality() {
-    const enoughInformation = new BranchHasRequiredFunctionality();
+    const enoughInformation = new BranchHasRequiredFunctionality(printer, output);
     return enoughInformation.execute();
 }
 
 async function checkIfBranchHasTests() {
-    const enoughInformation = new BranchHasTests();
+    const enoughInformation = new BranchHasTests(printer, output);
     return enoughInformation.execute();
 }
 
 async function checkIfBranchHasCleanDesignAndCode() {
-    const enoughInformation = new BranchHasCleanDesignAndCode();
+    const enoughInformation = new BranchHasCleanDesignAndCode(printer, output);
     return enoughInformation.execute();
 }
 
-function readFile(filePath) {
+function readFilePromisified(filePath) {
     return new Promise((resolve, reject) => {
-        fs.readFile(filePath, (err, data) => {
+        readFile(filePath, (err, data) => {
             return !err && !!data ? resolve(data.toString()) : reject(err);
         })
     });

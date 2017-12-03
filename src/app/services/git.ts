@@ -1,6 +1,6 @@
-const exec = require('./command-executor').exec;
+import {exec} from "./command-executor";
 
-class Git {
+export class Git {
 
     async isGitStatusClean() {
         try {
@@ -68,5 +68,3 @@ class Git {
     }
 
 }
-
-module.exports = new Git();
