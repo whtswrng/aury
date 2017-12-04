@@ -9,8 +9,9 @@ import {BranchHasCleanDesignAndCode} from "./rules/branch-has-clean-design-and-c
 import {IOutputPrinter} from "./services/output-printer/output-printer.interface";
 import {IUserInput} from "./services/input-device/input-user.interface";
 import {IConfig} from "./config.interface";
+import {IApplicationExecutor} from "./application-executor.interface";
 
-export class ApplicationExecutor {
+export class ApplicationExecutor implements IApplicationExecutor{
 
     constructor(private input: IUserInput, private output: IOutputPrinter, private git: Git, private config: IConfig) {
 
