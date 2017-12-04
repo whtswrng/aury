@@ -1,7 +1,7 @@
-import {BaseQuestionRule} from "./base-question-rule";
 import {IInput} from "../services/input-output/input.interface";
+import {AskAndAnswerRule} from "./ask-and-answer-rule";
 
-export class EnoughInformationInPullRequest extends BaseQuestionRule {
+export class EnoughInformationInPullRequest extends AskAndAnswerRule {
 
     constructor(private printer, protected input: IInput) {
         super(input, '2/6 Has pull request enough information to understand the problem? (yes/no)');

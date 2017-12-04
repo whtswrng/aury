@@ -1,7 +1,7 @@
-import {BaseQuestionRule} from "./base-question-rule";
 import {IInput} from "../services/input-output/input.interface";
+import {AskAndAnswerRule} from "./ask-and-answer-rule";
 
-export class BranchHasTests extends BaseQuestionRule {
+export class BranchHasTests extends AskAndAnswerRule {
 
     constructor(private printer, protected input: IInput) {
         super(input, '5/6 Has branch tests and are they properly testing the problem? (yes/no)');

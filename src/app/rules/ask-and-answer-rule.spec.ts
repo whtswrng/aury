@@ -1,15 +1,13 @@
-import {BaseQuestionRule} from "./base-question-rule";
 import * as sinon from "sinon";
 import {IInput} from "../services/input-output/input.interface";
+import {AskAndAnswerRule} from "./ask-and-answer-rule";
 const chai = require('chai');
 const expect = chai.expect;
 const chaiAsPromised = require("chai-as-promised");
 
 chai.use(chaiAsPromised);
 
-// TODO: Ask and Answer Rule!
-
-class SpecificQuestionRule extends BaseQuestionRule {
+class SpecificAskAndAnswerRule extends AskAndAnswerRule {
 
     protected rejectRule() {
         return Promise.reject(new RejectionRuleError());
@@ -40,7 +38,7 @@ describe('BaseQuestionRule', () => {
             askUser: askUserStub
         };
         question = 'foo';
-        questionRule = new SpecificQuestionRule(mockInput, question);
+        questionRule = new SpecificAskAndAnswerRule(mockInput, question);
     });
 
     describe('when asked a question', () => {

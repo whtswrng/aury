@@ -1,6 +1,6 @@
 import {IInput} from "../services/input-output/input.interface";
 
-export abstract class BaseQuestionRule {
+export abstract class AskAndAnswerRule {
 
     constructor(protected output: IInput, private question: string) {
 
