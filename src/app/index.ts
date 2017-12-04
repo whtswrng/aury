@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import {Git} from "./services/version-control-system/git";
 import {readFile} from "fs";
-import {CommandExecutor} from "./services/command-executor/command-executor";
 import {IConfig} from "./config.interface";
 import {ApplicationExecutor} from "./application-executor";
 import {IInput} from "./services/input-output/input.interface";
@@ -9,18 +8,20 @@ import {IOutput} from "./services/input-output/output.interface";
 import {StringColorizer} from "./services/string-colorizer/string-colorizer";
 import {IStringColorizer} from "./services/string-colorizer/string-colorizer.interface";
 import {Console} from "./services/input-output/console";
+import {ChildProcessExecutor} from "./services/command-executor/child-process-executor";
 
 const CONFIG_FILE_NAME = 'aury.config.json';
 
 start();
 
 async function start() {
-    const git: Git = new Git(new CommandExecutor());
+    const git: Git = new Git(new ChildProcessExecutor());
     const stringColorizer: IStringColorizer = new StringColorizer();
-    const console = new Console(stringColorizer);
+    const output: IOutput = new Console(stringColorizer);
+    const input: IInput = new Console(stringColorizer);
     const config: IConfig = await getConfig();
 
-    const application = new ApplicationExecutor(console, console, git, config);
+    const application = new ApplicationExecutor(input, output, git, config);
     application.start();
 }
 

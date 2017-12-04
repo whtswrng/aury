@@ -1,7 +1,7 @@
 import * as child from 'child_process';
 import {ICommandExecutor} from "./command-executor.interface";
 
-export class CommandExecutor implements ICommandExecutor{
+export class ChildProcessExecutor implements ICommandExecutor{
 
     public exec(command: string): Promise<string> {
         return new Promise((resolve, reject) => {

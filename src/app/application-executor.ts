@@ -2,7 +2,6 @@ import {Git} from "./services/version-control-system/git";
 import {BranchUpToDateWithMaster} from "./rules/branch-up-to-date-with-master";
 import {EnoughInformationInPullRequest} from "./rules/enough-information-in-pull-request";
 import {BranchMeetsAllPrerequisites} from "./rules/branch-meets-all-prerequisites";
-import {CommandExecutor} from "./services/command-executor/command-executor";
 import {BranchHasRequiredFunctionality} from "./rules/branch-has-required-functionality";
 import {BranchHasTests} from "./rules/branch-has-tests";
 import {BranchHasCleanDesignAndCode} from "./rules/branch-has-clean-design-and-code";
@@ -10,6 +9,7 @@ import {IConfig} from "./config.interface";
 import {IApplicationExecutor} from "./application-executor.interface";
 import {IInput} from "./services/input-output/input.interface";
 import {IOutput} from "./services/input-output/output.interface";
+import {ChildProcessExecutor} from "./services/command-executor/child-process-executor";
 
 export class ApplicationExecutor implements IApplicationExecutor{
 
@@ -60,7 +60,7 @@ export class ApplicationExecutor implements IApplicationExecutor{
 
     private async checkIfBranchMeetsAllPrerequisites() {
         const allPrerequisites = new BranchMeetsAllPrerequisites(
-            this.output, this.config.prerequisites, new CommandExecutor()
+            this.output, this.config.prerequisites, new ChildProcessExecutor()
         );
         return allPrerequisites.execute();
     }
