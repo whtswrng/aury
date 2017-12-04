@@ -1,8 +1,8 @@
-import {exec} from "../services/command-executor";
+import {ICommandExecutor} from "../services/command-executor/command-executor.interface";
 
 export class BranchMeetsAllPrerequisites {
 
-    constructor(private printer, private prerequisites) {
+    constructor(private printer, private prerequisites, private commandExecutor: ICommandExecutor) {
     }
 
     async execute() {
@@ -34,7 +34,7 @@ export class BranchMeetsAllPrerequisites {
 
     private async runScript(script) {
         try {
-            await exec(`npm run ${script}`);
+            await this.commandExecutor.exec(`npm run ${script}`);
         } catch (e) {
             console.log(e);
             throw new Error(`script "${script}" has not started well.`);

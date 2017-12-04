@@ -1,19 +1,25 @@
 #!/usr/bin/env node
-import {Git} from "./services/git";
+import {Git} from "./services/version-control-system/git";
 import {BranchHasRequiredFunctionality} from "./rules/branch-has-required-functionality";
 import {BranchHasTests} from "./rules/branch-has-tests";
 import {BranchHasCleanDesignAndCode} from "./rules/branch-has-clean-design-and-code";
 import {EnoughInformationInPullRequest} from "./rules/enough-information-in-pull-request";
 import {BranchMeetsAllPrerequisites} from "./rules/branch-meets-all-prerequisites";
-import {ConsoleOutputPrinter} from "./services/output-printer";
 import {BranchUpToDateWithMaster} from "./rules/branch-up-to-date-with-master";
-import {Terminal} from "./services/terminal";
+import {Terminal} from "./services/input-device/terminal";
 import {readFile} from "fs";
+import {CommandExecutor} from "./services/command-executor/command-executor";
+import {ConsoleOutputPrinter} from "./services/output-printer/console-output-printer";
+import {IOutputPrinter} from "./services/output-printer/output-printer.interface";
+import {IUserInput} from "./services/input-device/input-user.interface";
+import {IStringPainter} from "./services/string-painter/string-painter.interface";
+import {StringPainter} from "./services/string-painter/string-painter";
 
 const CONFIG_FILE_NAME = 'aury.config.json';
-const git = new Git();
-const printer = new ConsoleOutputPrinter();
-const output = new Terminal(printer);
+const git: Git = new Git(new CommandExecutor());
+const stringPainter: IStringPainter = new StringPainter();
+const output: IOutputPrinter = new ConsoleOutputPrinter(stringPainter);
+const input: IUserInput = new Terminal(stringPainter);
 
 startJourney();
 
@@ -21,14 +27,14 @@ async function startJourney() {
     const currentCommitHash = await git.getCurrentCommitHash();
 
     try {
-        await checkIfGitStatusIsClean();
+        // await checkIfGitStatusIsClean();
         await checkAllRules();
         await restoreGitToPreviousState(currentCommitHash);
 
-        printer.ok(`\nPull request was approved. Congratulations c:`);
+        output.ok(`\nPull request was approved. Congratulations c:`);
     } catch (e) {
         await restoreGitToPreviousState(currentCommitHash);
-        printer.error(`Pull request was denied, because of: "${e.message}"`);
+        output.error(`Pull request was denied, because of: "${e.message}"`);
         console.log(e);
     }
 }
@@ -49,33 +55,35 @@ async function checkAllRules() {
 }
 
 async function checkIfBranchIsUpToDateWithMaster() {
-    const branchUpToDateWithMaster = new BranchUpToDateWithMaster(printer, output, git);
+    const branchUpToDateWithMaster = new BranchUpToDateWithMaster(output, input, git);
     return branchUpToDateWithMaster.execute();
 }
 
 async function checkIfPullRequestHasEnoughInformation() {
-    const enoughInformation = new EnoughInformationInPullRequest(printer, output);
+    const enoughInformation = new EnoughInformationInPullRequest(output, input);
     return enoughInformation.execute();
 }
 
 async function checkIfBranchMeetsAllPrerequisites() {
     const fileData = await readFilePromisified(CONFIG_FILE_NAME);
-    const allPrerequisites = new BranchMeetsAllPrerequisites(printer, getPrerequisitedFromRawFileData(fileData));
+    const allPrerequisites = new BranchMeetsAllPrerequisites(
+        output, getPrerequisitedFromRawFileData(fileData), new CommandExecutor()
+    );
     return allPrerequisites.execute();
 }
 
 async function checkIfBranchHasRequiredFunctionality() {
-    const enoughInformation = new BranchHasRequiredFunctionality(printer, output);
+    const enoughInformation = new BranchHasRequiredFunctionality(output, input);
     return enoughInformation.execute();
 }
 
 async function checkIfBranchHasTests() {
-    const enoughInformation = new BranchHasTests(printer, output);
+    const enoughInformation = new BranchHasTests(output, input);
     return enoughInformation.execute();
 }
 
 async function checkIfBranchHasCleanDesignAndCode() {
-    const enoughInformation = new BranchHasCleanDesignAndCode(printer, output);
+    const enoughInformation = new BranchHasCleanDesignAndCode(output, input);
     return enoughInformation.execute();
 }
 
@@ -96,5 +104,7 @@ async function restoreGitToPreviousState(commit) {
     try {
         await git.abortMerge();
         await git.checkoutTo(commit);
-    } catch(e) {}
+    } catch(e) {
+        // let git handle this problem
+    }
 }

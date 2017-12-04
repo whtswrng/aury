@@ -1,9 +1,10 @@
-import * as readline from "readline";
-import {OutputUserInterface} from "./output-user-interface";
+import {IUserInput} from "./input-user.interface";
+import {IStringPainter} from "../string-painter/string-painter.interface";
+const readline = require('readline');
 
-export class Terminal implements OutputUserInterface{
+export class Terminal implements IUserInput{
 
-    constructor(private stringPainter) {
+    constructor(private stringPainter: IStringPainter) {
 
     }
 
@@ -15,7 +16,7 @@ export class Terminal implements OutputUserInterface{
                 terminal: false
             });
 
-            rl.question(this.stringPainter.info(question + ' '), (answer) => {
+            rl.question(this.stringPainter.info(question), (answer) => {
                 resolve(answer);
                 rl.close();
             });

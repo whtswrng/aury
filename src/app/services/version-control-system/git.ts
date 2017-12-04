@@ -1,16 +1,16 @@
-import {exec} from "./command-executor";
+import {ICommandExecutor} from "../command-executor/command-executor.interface";
 
 export class Git {
 
+    constructor(private commandExecutor: ICommandExecutor) {
+
+    }
+
     async isGitStatusClean() {
         try {
-            const output = await exec(`git status --porcelain`);
+            const output = await this.commandExecutor.exec(`git status --porcelain`);
 
-            if(output.length === 0) {
-                return true;
-            } else {
-                return false;
-            }
+            return output.length === 0;
         } catch (e) {
             console.log(e);
             throw new Error(`Something went wrong while getting a commit hash.`);
@@ -19,7 +19,7 @@ export class Git {
 
     async getCurrentCommitHash() {
         try {
-            return await exec(`git rev-parse HEAD`);
+            return await this.commandExecutor.exec(`git rev-parse HEAD`);
         } catch (e) {
             console.log(e);
             throw new Error(`Something went wrong while getting a commit hash.`);
@@ -28,7 +28,7 @@ export class Git {
 
     async checkoutTo(commitOrBranch) {
         try {
-            await exec(`git checkout ${commitOrBranch}`);
+            await this.commandExecutor.exec(`git checkout ${commitOrBranch}`);
         } catch (e) {
             throw new Error(`Commit or branch "${commitOrBranch}" does not exists`);
         }
@@ -36,7 +36,7 @@ export class Git {
 
     async abortMerge() {
         try {
-            await exec(`git merge --abort`);
+            await this.commandExecutor.exec(`git merge --abort`);
         } catch (e) {
             throw new Error(`Merge cannot be aborted.`);
         }
@@ -44,7 +44,7 @@ export class Git {
 
     async mergeFastForward(to, from) {
         try {
-            await exec(`git merge origin/${to} origin/${from} --no-commit`);
+            await this.commandExecutor.exec(`git merge origin/${to} origin/${from} --no-commit`);
         } catch (e) {
             console.log(e);
             throw new Error(`branch "${from}" cannot be merged with "${to}".`);
@@ -53,16 +53,18 @@ export class Git {
 
     async pull() {
         try {
-            await exec(`git pull`);
+            await this.commandExecutor.exec(`git pull`);
         } catch (e) {
+            console.log(e);
             throw new Error(e);
         }
     }
 
     async fetch() {
         try {
-            await exec(`git fetch`);
+            await this.commandExecutor.exec(`git fetch`);
         } catch (e) {
+            console.log(e);
             throw new Error(e);
         }
     }

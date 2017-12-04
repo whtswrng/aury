@@ -1,10 +1,10 @@
 import {BaseQuestionRule} from "./base-question-rule";
-import {OutputUserInterface} from "../services/output-user-interface";
+import {IUserInput} from "../services/input-device/input-user.interface";
 
 export class BranchHasCleanDesignAndCode extends BaseQuestionRule {
 
-    constructor(private printer, protected output: OutputUserInterface) {
-        super(output, '6/6 Has branch clean design and code? (yes/no)');
+    constructor(private printer, protected input: IUserInput) {
+        super(input, '6/6 Has branch clean design and code? (yes/no)');
     }
 
     protected rejectRule() {

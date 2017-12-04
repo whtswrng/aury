@@ -1,19 +1,19 @@
-import {OutputUserInterface} from "../services/output-user-interface";
+import {IUserInput} from "../services/input-device/input-user.interface";
 
 export abstract class BaseQuestionRule {
 
-    constructor(protected output: OutputUserInterface, private question: string) {
+    constructor(protected output: IUserInput, private question: string) {
 
     }
 
-    public async execute() {
+    public async execute(): Promise<void> {
         try {
             const answer = await this.output.askUser(this.question);
 
             if(this.stripString(answer) === 'yes') {
                 return this.resolveRule();
             } else if(this.stripString(answer) === 'no') {
-                this.rejectRule();
+                return this.rejectRule();
             } else {
                 return this.execute();
             }

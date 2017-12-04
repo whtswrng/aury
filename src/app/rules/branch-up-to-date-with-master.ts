@@ -1,9 +1,9 @@
-import {Git} from "../services/git";
-import {OutputUserInterface} from "../services/output-user-interface";
+import {Git} from "../services/version-control-system/git";
+import {IUserInput} from "../services/input-device/input-user.interface";
 
 export class BranchUpToDateWithMaster {
 
-    constructor(private printer, private output: OutputUserInterface, private git: Git) {
+    constructor(private printer, private input: IUserInput, private git: Git) {
 
     }
 
@@ -25,7 +25,7 @@ export class BranchUpToDateWithMaster {
 
     private async _getBranchFromUser() {
         const insertBranchNameString = 'Please insert branch name: ';
-        return this.output.askUser(insertBranchNameString);
+        return this.input.askUser(insertBranchNameString);
     }
 
 }

@@ -9,8 +9,12 @@
   "include": [
     "src/**/*"
   ],
+  "files": [
+    "./src/**/*.ts"
+  ],
   "exclude": [
     "node_modules",
+    "@types/**",
     "**/*.spec.ts"
   ]
 }
