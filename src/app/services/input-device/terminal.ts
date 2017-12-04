@@ -1,6 +1,6 @@
 import {IUserInput} from "./input-user.interface";
 import {IStringPainter} from "../string-painter/string-painter.interface";
-const readline = require('readline');
+import * as readline from "readline";
 
 export class Terminal implements IUserInput{
 
