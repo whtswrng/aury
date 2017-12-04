@@ -12,6 +12,6 @@ export class BranchHasCleanDesignAndCode extends AskAndAnswerRule {
     }
 
     protected resolveRule() {
-        return this.printer.ok('ᶘ   2) Pull request has properly described the problem.');
+        return this.printer.ok('2) Pull request has properly described the problem.');
     }
 }

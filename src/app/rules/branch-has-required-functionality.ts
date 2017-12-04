@@ -12,7 +12,7 @@ export class BranchHasRequiredFunctionality extends AskAndAnswerRule {
     }
 
     protected resolveRule() {
-        return this.printer.ok('ᶘ   4) Branch has required functionality.');
+        return this.printer.ok('4) Branch has required functionality.');
     }
 
 }

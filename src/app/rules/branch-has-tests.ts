@@ -12,6 +12,6 @@ export class BranchHasTests extends AskAndAnswerRule {
     }
 
     protected resolveRule() {
-        return this.printer.ok('ᶘ   5) Branch has tests and they are properly testing the problem.');
+        return this.printer.ok('5) Branch has tests and they are properly testing the problem.');
     }
 }

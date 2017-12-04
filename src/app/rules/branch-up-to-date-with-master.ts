@@ -16,9 +16,9 @@ export class BranchUpToDateWithMaster {
             await this.git.checkoutTo(branch);
             await this.git.mergeFastForward('master', branch);
 
-            this.printer.ok('ᶘ   1) Branch can be merged with master.');
+            this.printer.ok('1) Branch can be merged with master.');
         } catch (e) {
-            this.printer.error(`✘    1) Branch cannot be merged with master.`);
+            this.printer.error(`1) Branch cannot be merged with master.`);
             throw e;
         }
     }

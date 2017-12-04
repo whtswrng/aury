@@ -1,3 +1,5 @@
 export interface IConfig {
-    prerequisites: Array<string>;
+    prerequisites: prerequisites;
 }
+
+export type prerequisites = Array<string>;

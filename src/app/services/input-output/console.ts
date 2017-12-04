@@ -29,11 +29,11 @@ export class Console implements IOutput, IInput{
     }
 
     public error(string) {
-        console.log(this.stringPainter.error(string))
+        console.log(this.stringPainter.error(`✘    ${string}`));
     }
 
     public ok(string) {
-        console.log(this.stringPainter.ok(string));
+        console.log(this.stringPainter.ok(`ᶘ   ${string}`));
     }
 
 }
