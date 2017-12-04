@@ -1,9 +1,9 @@
 import {Git} from "../services/version-control-system/git";
-import {IUserInput} from "../services/input-device/input-user.interface";
+import {IInput} from "../services/input-output/input.interface";
 
 export class BranchUpToDateWithMaster {
 
-    constructor(private printer, private input: IUserInput, private git: Git) {
+    constructor(private printer, private input: IInput, private git: Git) {
 
     }
 

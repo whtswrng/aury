@@ -1,9 +1,9 @@
 import {BaseQuestionRule} from "./base-question-rule";
-import {IUserInput} from "../services/input-device/input-user.interface";
+import {IInput} from "../services/input-output/input.interface";
 
 export class BranchHasTests extends BaseQuestionRule {
 
-    constructor(private printer, protected input: IUserInput) {
+    constructor(private printer, protected input: IInput) {
         super(input, '5/6 Has branch tests and are they properly testing the problem? (yes/no)');
     }
 

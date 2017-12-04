@@ -1,6 +1,6 @@
 import {BaseQuestionRule} from "./base-question-rule";
 import * as sinon from "sinon";
-import {IUserInput} from "../services/input-device/input-user.interface";
+import {IInput} from "../services/input-output/input.interface";
 const chai = require('chai');
 const expect = chai.expect;
 const chaiAsPromised = require("chai-as-promised");
@@ -30,7 +30,7 @@ class RejectionRuleError extends Error {
 
 describe('BaseQuestionRule', () => {
     let askUserStub;
-    let mockInput: IUserInput;
+    let mockInput: IInput;
     let question;
     let questionRule;
 

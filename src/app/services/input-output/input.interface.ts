@@ -1,3 +1,3 @@
-export interface IUserInput {
+export interface IInput {
     askUser(question: string);
 }

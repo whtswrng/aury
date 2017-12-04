@@ -1,4 +1,5 @@
 import * as colors from 'colors';
+import {IStringColorizer} from "./string-colorizer.interface";
 
 colors.setTheme({
     silly: 'rainbow',
@@ -14,7 +15,7 @@ colors.setTheme({
     error: 'red'
 });
 
-export class StringPainter implements StringPainter{
+export class StringColorizer implements IStringColorizer{
 
     public info(string) {
         return string.info;

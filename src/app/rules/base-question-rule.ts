@@ -1,8 +1,8 @@
-import {IUserInput} from "../services/input-device/input-user.interface";
+import {IInput} from "../services/input-output/input.interface";
 
 export abstract class BaseQuestionRule {
 
-    constructor(protected output: IUserInput, private question: string) {
+    constructor(protected output: IInput, private question: string) {
 
     }
 

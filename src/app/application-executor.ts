@@ -6,14 +6,14 @@ import {CommandExecutor} from "./services/command-executor/command-executor";
 import {BranchHasRequiredFunctionality} from "./rules/branch-has-required-functionality";
 import {BranchHasTests} from "./rules/branch-has-tests";
 import {BranchHasCleanDesignAndCode} from "./rules/branch-has-clean-design-and-code";
-import {IOutputPrinter} from "./services/output-printer/output-printer.interface";
-import {IUserInput} from "./services/input-device/input-user.interface";
 import {IConfig} from "./config.interface";
 import {IApplicationExecutor} from "./application-executor.interface";
+import {IInput} from "./services/input-output/input.interface";
+import {IOutput} from "./services/input-output/output.interface";
 
 export class ApplicationExecutor implements IApplicationExecutor{
 
-    constructor(private input: IUserInput, private output: IOutputPrinter, private git: Git, private config: IConfig) {
+    constructor(private input: IInput, private output: IOutput, private git: Git, private config: IConfig) {
 
     }
 
