@@ -27,7 +27,7 @@ async function startJourney() {
     const currentCommitHash = await git.getCurrentCommitHash();
 
     try {
-        // await checkIfGitStatusIsClean();
+        await checkIfGitStatusIsClean();
         await checkAllRules();
         await restoreGitToPreviousState(currentCommitHash);
 
