@@ -44,9 +44,10 @@ export class ApplicationExecutor implements IApplicationExecutor{
 
 
     private async denyPullRequest(currentCommitHash: string, e) {
+        const errorMessage = `Pull request was denied, because of: "${e.message}"`;
         await this.restoreGitToPreviousState(currentCommitHash);
-        await this.notifyReviewerAboutDeniedPullRequest(e);
-        this.output.error(`Pull request was denied, because of: "${e.message}"`);
+        await this.notifyReviewerAboutDeniedPullRequest(errorMessage);
+        this.output.error(errorMessage);
         console.log(e);
     }
 
@@ -110,9 +111,9 @@ export class ApplicationExecutor implements IApplicationExecutor{
         this.output.ok(`\nPull request was approved. Congratulations c:`);
     }
 
-    private async notifyReviewerAboutDeniedPullRequest(error) {
+    private async notifyReviewerAboutDeniedPullRequest(message) {
         if(this.notifier) {
-            const result = await this.notifier.notify(this.pullRequestAuthor, error.message);
+            return await this.notifier.notify(this.pullRequestAuthor, message);
         }
     }
 
