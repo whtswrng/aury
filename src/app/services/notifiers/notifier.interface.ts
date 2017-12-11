@@ -1,3 +1,5 @@
 export interface INotifier {
-    notify(user, message: string): Promise<void>
+    notifySuccess(user, message: string): Promise<void>
+    notifyInfo(user, message: string): Promise<void>
+    notifyError(user, message: string): Promise<void>
 }

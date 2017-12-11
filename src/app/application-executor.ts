@@ -10,8 +10,6 @@ import {IApplicationExecutor} from "./application-executor.interface";
 import {IInput} from "./services/input-output/input.interface";
 import {IOutput} from "./services/input-output/output.interface";
 import {ChildProcessExecutor} from "./services/command-executor/child-process-executor";
-import {SlackNotifier} from "./services/notifiers/slack-notifier";
-import {HttpRequester} from "./services/requesters/http-requester";
 import {INotifier} from "./services/notifiers/notifier.interface";
 
 export class ApplicationExecutor implements IApplicationExecutor{
@@ -26,13 +24,13 @@ export class ApplicationExecutor implements IApplicationExecutor{
     public async start() {
         const currentCommitHash = await this.git.getCurrentCommitHash();
 
-        if(this.config.tokens.slack) {
-            this.pullRequestAuthor = await this.input.askUser(
-                'Type slack user name of the author of pull request: '
-            );
-        }
-
         try {
+            if(this.config.tokens.slack) {
+                this.pullRequestAuthor = await this.input.askUser(
+                    'Type slack user name of the author of pull request: '
+                );
+            }
+            await this.notifyAuthorAboutStartingReview();
             await this.checkIfGitStatusIsClean();
             await this.checkAllRules();
             await this.restoreGitToPreviousState(currentCommitHash);
@@ -43,17 +41,13 @@ export class ApplicationExecutor implements IApplicationExecutor{
     }
 
 
-    private async denyPullRequest(currentCommitHash: string, e) {
-        const errorMessage = `Pull request was denied, because of: "${e.message}"`;
-        await this.restoreGitToPreviousState(currentCommitHash);
-        await this.notifyReviewerAboutDeniedPullRequest(errorMessage);
-        this.output.error(errorMessage);
-        console.log(e);
+    private async notifyAuthorAboutStartingReview() {
+        await this.notifier.notifyInfo(this.pullRequestAuthor, 'Just letting you know that someone is working on your pull request.');
     }
 
     private async checkIfGitStatusIsClean() {
         if( ! await this.git.isGitStatusClean()) {
-            throw new Error('Git status is not clean!');
+            throw new GitStatusIsNotClean('Git status is not clean!');
         }
     }
 
@@ -98,6 +92,19 @@ export class ApplicationExecutor implements IApplicationExecutor{
         return enoughInformation.execute();
     }
 
+    private async denyPullRequest(currentCommitHash: string, e) {
+        const errorMessage = `Pull request was denied, because of: "${e.message}"`;
+        await this.restoreGitToPreviousState(currentCommitHash);
+        this.output.error(errorMessage);
+        console.log(e);
+
+        if(e instanceof GitStatusIsNotClean) {
+            // do nothing
+        } else {
+            await this.notifyReviewerAboutDeniedPullRequest(errorMessage);
+        }
+    }
+
     private async restoreGitToPreviousState(commit) {
         try {
             await this.git.abortMerge();
@@ -107,14 +114,25 @@ export class ApplicationExecutor implements IApplicationExecutor{
         }
     }
 
-    private approvePullRequest() {
-        this.output.ok(`\nPull request was approved. Congratulations c:`);
+    private async approvePullRequest() {
+        const message = `Pull request was approved. Congratulations c:`;
+        await this.notifier.notifySuccess(this.pullRequestAuthor, message);
+        this.output.ok(`\n${message}`);
     }
 
     private async notifyReviewerAboutDeniedPullRequest(message) {
         if(this.notifier) {
-            return await this.notifier.notify(this.pullRequestAuthor, message);
+            return await this.notifier.notifyError(this.pullRequestAuthor, message);
         }
     }
 
 }
+
+
+class GitStatusIsNotClean extends Error {
+    constructor(errorMessage) {
+        super(errorMessage);
+        Object.setPrototypeOf(this, GitStatusIsNotClean.prototype);
+    }
+}
+
