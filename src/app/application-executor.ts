@@ -74,17 +74,23 @@ export class ApplicationExecutor implements IApplicationExecutor {
     private async checkIfBranchIsUpToDateWithMaster() {
         const branchUpToDateWithMaster = new BranchUpToDateWithMaster(this.pullRequestBranch, this.output, this.input, this.git);
         await branchUpToDateWithMaster.execute();
-        this.notifier.notifyInfo(
-            this.pullRequestAuthor,
-            `(${this.pullRequestBranch}) 1/6 :ok: Branch can be merged with master.`);
+
+        if(this.notifier) {
+            this.notifier.notifyInfo(
+                this.pullRequestAuthor,
+                `(${this.pullRequestBranch}) 1/6 :ok: Branch can be merged with master.`);
+        }
     }
 
     private async checkIfPullRequestHasEnoughInformation() {
         const enoughInformation = new EnoughInformationInPullRequest(this.output, this.input);
         await enoughInformation.execute();
-        this.notifier.notifyInfo(
-            this.pullRequestAuthor,
-            `(${this.pullRequestBranch}) 2/6 :ok: Pull request has enough information to understand the problem.`);
+
+        if(this.notifier) {
+            this.notifier.notifyInfo(
+                this.pullRequestAuthor,
+                `(${this.pullRequestBranch}) 2/6 :ok: Pull request has enough information to understand the problem.`);
+        }
     }
 
     private async checkIfBranchMeetsAllPrerequisites() {
@@ -92,33 +98,45 @@ export class ApplicationExecutor implements IApplicationExecutor {
             this.output, this.config.prerequisites, new ChildProcessExecutor()
         );
         await allPrerequisites.execute();
-        this.notifier.notifyInfo(
-            this.pullRequestAuthor,
-            `(${this.pullRequestBranch}) 3/6 :ok: All prerequisites has passed.`);
+
+        if(this.notifier) {
+            this.notifier.notifyInfo(
+                this.pullRequestAuthor,
+                `(${this.pullRequestBranch}) 3/6 :ok: All prerequisites has passed.`);
+        }
     }
 
     private async checkIfBranchHasRequiredFunctionality() {
         const enoughInformation = new BranchHasRequiredFunctionality(this.output, this.input);
         await enoughInformation.execute();
-        this.notifier.notifyInfo(
-            this.pullRequestAuthor,
-            `(${this.pullRequestBranch}) 4/6 :ok: Branch has required functionality (problem was solved).`);
+
+        if(this.notifier) {
+            this.notifier.notifyInfo(
+                this.pullRequestAuthor,
+                `(${this.pullRequestBranch}) 4/6 :ok: Branch has required functionality (problem was solved).`);
+        }
     }
 
     private async checkIfBranchHasTests() {
         const enoughInformation = new BranchHasTests(this.output, this.input);
         await enoughInformation.execute();
-        this.notifier.notifyInfo(
-            this.pullRequestAuthor,
-            `(${this.pullRequestBranch}) 5/6 :ok: Branch has correct tests.`);
+
+        if(this.notifier) {
+            this.notifier.notifyInfo(
+                this.pullRequestAuthor,
+                `(${this.pullRequestBranch}) 5/6 :ok: Branch has correct tests.`);
+        }
     }
 
     private async checkIfBranchHasCleanDesignAndCode() {
         const enoughInformation = new BranchHasCleanDesignAndCode(this.output, this.input);
         await enoughInformation.execute();
-        this.notifier.notifyInfo(
-            this.pullRequestAuthor,
-            `(${this.pullRequestBranch}) 6/6 :ok: Branch has clean design and code. Good job!`);
+
+        if(this.notifier) {
+            await this.notifier.notifyInfo(
+                this.pullRequestAuthor,
+                `(${this.pullRequestBranch}) 6/6 :ok: Branch has clean design and code. Good job!`);
+        }
     }
 
     private async denyPullRequest(currentCommitHash: string, e) {
