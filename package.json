@@ -13,7 +13,8 @@
   "dependencies": {
     "@types/es6-promise": "0.0.33",
     "colors": "^1.1.2",
-    "typescript": "^2.6.2"
+    "typescript": "^2.6.2",
+    "ts-node": "^3.3.0"
   },
   "devDependencies": {
     "@types/chai": "^4.0.7",
@@ -28,7 +29,6 @@
     "chai-things": "^0.2.0",
     "expect": "^21.2.1",
     "mocha": "^4.0.1",
-    "sinon": "^4.1.2",
-    "ts-node": "^3.3.0"
+    "sinon": "^4.1.2"
   }
 }
