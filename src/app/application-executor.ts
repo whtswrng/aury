@@ -73,34 +73,52 @@ export class ApplicationExecutor implements IApplicationExecutor {
 
     private async checkIfBranchIsUpToDateWithMaster() {
         const branchUpToDateWithMaster = new BranchUpToDateWithMaster(this.pullRequestBranch, this.output, this.input, this.git);
-        return branchUpToDateWithMaster.execute();
+        await branchUpToDateWithMaster.execute();
+        this.notifier.notifyInfo(
+            this.pullRequestAuthor,
+            `(${this.pullRequestBranch}) 1/6 :ok: Branch can be merged with master.`);
     }
 
     private async checkIfPullRequestHasEnoughInformation() {
         const enoughInformation = new EnoughInformationInPullRequest(this.output, this.input);
-        return enoughInformation.execute();
+        await enoughInformation.execute();
+        this.notifier.notifyInfo(
+            this.pullRequestAuthor,
+            `(${this.pullRequestBranch}) 2/6 :ok: Pull request has enough information to understand the problem.`);
     }
 
     private async checkIfBranchMeetsAllPrerequisites() {
         const allPrerequisites = new BranchMeetsAllPrerequisites(
             this.output, this.config.prerequisites, new ChildProcessExecutor()
         );
-        return allPrerequisites.execute();
+        await allPrerequisites.execute();
+        this.notifier.notifyInfo(
+            this.pullRequestAuthor,
+            `(${this.pullRequestBranch}) 3/6 :ok: All prerequisites has passed.`);
     }
 
     private async checkIfBranchHasRequiredFunctionality() {
         const enoughInformation = new BranchHasRequiredFunctionality(this.output, this.input);
-        return enoughInformation.execute();
+        await enoughInformation.execute();
+        this.notifier.notifyInfo(
+            this.pullRequestAuthor,
+            `(${this.pullRequestBranch}) 4/6 :ok: Branch has required functionality (problem was solved).`);
     }
 
     private async checkIfBranchHasTests() {
         const enoughInformation = new BranchHasTests(this.output, this.input);
-        return enoughInformation.execute();
+        await enoughInformation.execute();
+        this.notifier.notifyInfo(
+            this.pullRequestAuthor,
+            `(${this.pullRequestBranch}) 5/6 :ok: Branch has correct tests.`);
     }
 
     private async checkIfBranchHasCleanDesignAndCode() {
         const enoughInformation = new BranchHasCleanDesignAndCode(this.output, this.input);
-        return enoughInformation.execute();
+        await enoughInformation.execute();
+        this.notifier.notifyInfo(
+            this.pullRequestAuthor,
+            `(${this.pullRequestBranch}) 6/6 :ok: Branch has clean design and code. Good job!`);
     }
 
     private async denyPullRequest(currentCommitHash: string, e) {
