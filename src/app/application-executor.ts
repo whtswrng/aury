@@ -26,13 +26,15 @@ export class ApplicationExecutor implements IApplicationExecutor {
         const currentCommitHash = await this.git.getCurrentCommitHash();
 
         try {
+            this.pullRequestBranch = await this.getBranchFromUser();
+
             if (this.config.tokens.slack) {
                 this.pullRequestAuthor = await this.input.askUser(
                     'Type slack user name of the author of pull request: '
                 );
+                await this.notifyAuthorAboutStartingReview();
             }
-            this.pullRequestBranch = await this.getBranchFromUser();
-            await this.notifyAuthorAboutStartingReview();
+
             await this.checkIfGitStatusIsClean();
             await this.checkAllRules();
             await this.restoreGitToPreviousState(currentCommitHash);
