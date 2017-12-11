@@ -50,7 +50,7 @@ export class ApplicationExecutor implements IApplicationExecutor {
     private async notifyAuthorAboutStartingReview() {
         await this.notifier.notifyInfo(
             this.pullRequestAuthor,
-            `Just letting you know that someone is working on your pull request ${this.pullRequestBranch}.`
+            `Just letting you know that someone is working on your pull request on branch ${this.pullRequestBranch}.`
         );
     }
 
@@ -102,7 +102,7 @@ export class ApplicationExecutor implements IApplicationExecutor {
     }
 
     private async denyPullRequest(currentCommitHash: string, e) {
-        const errorMessage = `Pull request (${this.pullRequestBranch}) was denied, because of: "${e.message}"`;
+        const errorMessage = `Pull request on branch ${this.pullRequestBranch} was denied, because of: "${e.message}"`;
         await this.restoreGitToPreviousState(currentCommitHash);
         this.output.error(errorMessage);
         console.log(e);
@@ -124,7 +124,7 @@ export class ApplicationExecutor implements IApplicationExecutor {
     }
 
     private async approvePullRequest() {
-        const message = `Pull request (${this.pullRequestBranch}) was approved. Congratulations c:`;
+        const message = `Pull request on ${this.pullRequestBranch} was approved. Congratulations c:`;
         await this.notifier.notifySuccess(this.pullRequestAuthor, message);
         this.output.ok(`\n${message}`);
     }
