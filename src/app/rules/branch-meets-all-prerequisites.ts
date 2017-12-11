@@ -41,7 +41,7 @@ export class BranchMeetsAllPrerequisites {
             await this.commandExecutor.exec(`npm run ${script}`);
         } catch (e) {
             console.log(e);
-            throw new Error(`script "${script}" has not started well.`);
+            throw new Error(`script "${script}" has not finished well.`);
         }
     }
 

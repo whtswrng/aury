@@ -12,9 +12,10 @@ import {IOutput} from "./services/input-output/output.interface";
 import {ChildProcessExecutor} from "./services/command-executor/child-process-executor";
 import {INotifier} from "./services/notifiers/notifier.interface";
 
-export class ApplicationExecutor implements IApplicationExecutor{
+export class ApplicationExecutor implements IApplicationExecutor {
 
     private pullRequestAuthor?: string;
+    private pullRequestBranch: string;
 
     constructor(private input: IInput, private output: IOutput, private git: Git,
                 private config: IConfig, private notifier?: INotifier) {
@@ -25,11 +26,12 @@ export class ApplicationExecutor implements IApplicationExecutor{
         const currentCommitHash = await this.git.getCurrentCommitHash();
 
         try {
-            if(this.config.tokens.slack) {
+            if (this.config.tokens.slack) {
                 this.pullRequestAuthor = await this.input.askUser(
                     'Type slack user name of the author of pull request: '
                 );
             }
+            this.pullRequestBranch = await this.getBranchFromUser();
             await this.notifyAuthorAboutStartingReview();
             await this.checkIfGitStatusIsClean();
             await this.checkAllRules();
@@ -40,13 +42,20 @@ export class ApplicationExecutor implements IApplicationExecutor{
         }
     }
 
+    private async getBranchFromUser() {
+        const insertBranchNameString = 'Please insert branch name for code review: ';
+        return this.input.askUser(insertBranchNameString);
+    }
 
     private async notifyAuthorAboutStartingReview() {
-        await this.notifier.notifyInfo(this.pullRequestAuthor, 'Just letting you know that someone is working on your pull request.');
+        await this.notifier.notifyInfo(
+            this.pullRequestAuthor,
+            `Just letting you know that someone is working on your pull request ${this.pullRequestBranch}.`
+        );
     }
 
     private async checkIfGitStatusIsClean() {
-        if( ! await this.git.isGitStatusClean()) {
+        if (!await this.git.isGitStatusClean()) {
             throw new GitStatusIsNotClean('Git status is not clean!');
         }
     }
@@ -61,7 +70,7 @@ export class ApplicationExecutor implements IApplicationExecutor{
     }
 
     private async checkIfBranchIsUpToDateWithMaster() {
-        const branchUpToDateWithMaster = new BranchUpToDateWithMaster(this.output, this.input, this.git);
+        const branchUpToDateWithMaster = new BranchUpToDateWithMaster(this.pullRequestBranch, this.output, this.input, this.git);
         return branchUpToDateWithMaster.execute();
     }
 
@@ -93,12 +102,12 @@ export class ApplicationExecutor implements IApplicationExecutor{
     }
 
     private async denyPullRequest(currentCommitHash: string, e) {
-        const errorMessage = `Pull request was denied, because of: "${e.message}"`;
+        const errorMessage = `Pull request (${this.pullRequestBranch}) was denied, because of: "${e.message}"`;
         await this.restoreGitToPreviousState(currentCommitHash);
         this.output.error(errorMessage);
         console.log(e);
 
-        if(e instanceof GitStatusIsNotClean) {
+        if (e instanceof GitStatusIsNotClean) {
             // do nothing
         } else {
             await this.notifyReviewerAboutDeniedPullRequest(errorMessage);
@@ -109,19 +118,19 @@ export class ApplicationExecutor implements IApplicationExecutor{
         try {
             await this.git.abortMerge();
             await this.git.checkoutTo(commit);
-        } catch(e) {
+        } catch (e) {
             // let git handle this problem
         }
     }
 
     private async approvePullRequest() {
-        const message = `Pull request was approved. Congratulations c:`;
+        const message = `Pull request (${this.pullRequestBranch}) was approved. Congratulations c:`;
         await this.notifier.notifySuccess(this.pullRequestAuthor, message);
         this.output.ok(`\n${message}`);
     }
 
     private async notifyReviewerAboutDeniedPullRequest(message) {
-        if(this.notifier) {
+        if (this.notifier) {
             return await this.notifier.notifyError(this.pullRequestAuthor, message);
         }
     }
