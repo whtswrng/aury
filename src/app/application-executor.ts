@@ -10,27 +10,44 @@ import {IApplicationExecutor} from "./application-executor.interface";
 import {IInput} from "./services/input-output/input.interface";
 import {IOutput} from "./services/input-output/output.interface";
 import {ChildProcessExecutor} from "./services/command-executor/child-process-executor";
+import {SlackNotifier} from "./services/notifiers/slack-notifier";
+import {HttpRequester} from "./services/requesters/http-requester";
+import {INotifier} from "./services/notifiers/notifier.interface";
 
 export class ApplicationExecutor implements IApplicationExecutor{
 
-    constructor(private input: IInput, private output: IOutput, private git: Git, private config: IConfig) {
+    private pullRequestAuthor?: string;
+
+    constructor(private input: IInput, private output: IOutput, private git: Git,
+                private config: IConfig, private notifier?: INotifier) {
 
     }
 
     public async start() {
         const currentCommitHash = await this.git.getCurrentCommitHash();
 
+        if(this.config.tokens.slack) {
+            this.pullRequestAuthor = await this.input.askUser(
+                'Type slack user name of the author of pull request: '
+            );
+        }
+
         try {
             await this.checkIfGitStatusIsClean();
             await this.checkAllRules();
             await this.restoreGitToPreviousState(currentCommitHash);
-
-            this.output.ok(`\nPull request was approved. Congratulations c:`);
+            await this.approvePullRequest();
         } catch (e) {
-            await this.restoreGitToPreviousState(currentCommitHash);
-            this.output.error(`Pull request was denied, because of: "${e.message}"`);
-            console.log(e);
+            await this.denyPullRequest(currentCommitHash, e);
         }
+    }
+
+
+    private async denyPullRequest(currentCommitHash: string, e) {
+        await this.restoreGitToPreviousState(currentCommitHash);
+        await this.notifyReviewerAboutDeniedPullRequest(e);
+        this.output.error(`Pull request was denied, because of: "${e.message}"`);
+        console.log(e);
     }
 
     private async checkIfGitStatusIsClean() {
@@ -86,6 +103,16 @@ export class ApplicationExecutor implements IApplicationExecutor{
             await this.git.checkoutTo(commit);
         } catch(e) {
             // let git handle this problem
+        }
+    }
+
+    private approvePullRequest() {
+        this.output.ok(`\nPull request was approved. Congratulations c:`);
+    }
+
+    private async notifyReviewerAboutDeniedPullRequest(error) {
+        if(this.notifier) {
+            const result = await this.notifier.notify(this.pullRequestAuthor, error.message);
         }
     }
 

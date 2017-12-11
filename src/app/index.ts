@@ -9,6 +9,9 @@ import {StringColorizer} from "./services/string-colorizer/string-colorizer";
 import {IStringColorizer} from "./services/string-colorizer/string-colorizer.interface";
 import {Console} from "./services/input-output/console";
 import {ChildProcessExecutor} from "./services/command-executor/child-process-executor";
+import {SlackNotifier} from "./services/notifiers/slack-notifier";
+import {HttpRequester} from "./services/requesters/http-requester";
+import {INotifier} from "./services/notifiers/notifier.interface";
 
 const CONFIG_FILE_NAME = 'aury.config.json';
 
@@ -20,8 +23,9 @@ async function start() {
     const output: IOutput = new Console(stringColorizer);
     const input: IInput = new Console(stringColorizer);
     const config: IConfig = await getConfig();
+    const notifier = getNotifier(config);
 
-    const application = new ApplicationExecutor(input, output, git, config);
+    const application = new ApplicationExecutor(input, output, git, config, notifier);
     application.start();
 }
 
@@ -42,3 +46,10 @@ function parseConfigFile(rawFileData: string): IConfig {
     return JSON.parse(rawFileData);
 }
 
+function getNotifier(config: IConfig): INotifier {
+    if (config && config.tokens && config.tokens.slack) {
+        return new SlackNotifier(config.tokens.slack, new HttpRequester());
+    }
+
+    return null;
+}

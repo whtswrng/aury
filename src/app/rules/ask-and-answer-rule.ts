@@ -2,13 +2,13 @@ import {IInput} from "../services/input-output/input.interface";
 
 export abstract class AskAndAnswerRule {
 
-    constructor(protected output: IInput, private question: string) {
+    constructor(protected input: IInput, private question: string) {
 
     }
 
     public async execute(): Promise<void> {
         try {
-            const answer = await this.output.askUser(this.question);
+            const answer = await this.input.askUser(this.question);
 
             if(this.stripString(answer) === 'yes') {
                 return this.resolveRule();
