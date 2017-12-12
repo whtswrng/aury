@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "outDir": "dist",
     "module": "commonjs",
     "removeComments": true,
     "preserveConstEnums": true,
@@ -8,9 +9,6 @@
   },
   "include": [
     "src/**/*"
-  ],
-  "files": [
-    "./src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
