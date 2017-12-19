@@ -28,8 +28,8 @@ export class SlackNotifier implements INotifier {
         const payload = {
             token: this.token,
             channel: `@${user}`,
-            text: `:red_circle: ${message}. I am sure there are more information about the state of pull request 
-                on github or the reviewer will contact you. :c`
+            text: `:red_circle: ${message}. I am sure there are more information about the state of pull request` +
+                `on github or the reviewer will contact you. :c`
         };
 
         try {

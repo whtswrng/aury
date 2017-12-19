@@ -32,7 +32,12 @@ export class ApplicationExecutor implements IApplicationExecutor {
                 this.pullRequestAuthor = await this.input.askUser(
                     'Type slack user name of the author of pull request: '
                 );
-                await this.notifyAuthorAboutStartingReview();
+                const sendMessageAboutStartingReview = await this.input.askUser(
+                    'Send message about starting review?: '
+                );
+                if(sendMessageAboutStartingReview === 'yes') {
+                    await this.notifyAuthorAboutStartingReview();
+                }
             }
 
             await this.checkIfGitStatusIsClean();
@@ -74,23 +79,11 @@ export class ApplicationExecutor implements IApplicationExecutor {
     private async checkIfBranchIsUpToDateWithMaster() {
         const branchUpToDateWithMaster = new BranchUpToDateWithMaster(this.pullRequestBranch, this.output, this.input, this.git);
         await branchUpToDateWithMaster.execute();
-
-        if(this.notifier) {
-            this.notifier.notifyInfo(
-                this.pullRequestAuthor,
-                `(${this.pullRequestBranch}) 1/6 :ok: Branch can be merged with master.`);
-        }
     }
 
     private async checkIfPullRequestHasEnoughInformation() {
         const enoughInformation = new EnoughInformationInPullRequest(this.output, this.input);
         await enoughInformation.execute();
-
-        if(this.notifier) {
-            this.notifier.notifyInfo(
-                this.pullRequestAuthor,
-                `(${this.pullRequestBranch}) 2/6 :ok: Pull request has enough information to understand the problem.`);
-        }
     }
 
     private async checkIfBranchMeetsAllPrerequisites() {
@@ -98,45 +91,21 @@ export class ApplicationExecutor implements IApplicationExecutor {
             this.output, this.config.prerequisites, new ChildProcessExecutor()
         );
         await allPrerequisites.execute();
-
-        if(this.notifier) {
-            this.notifier.notifyInfo(
-                this.pullRequestAuthor,
-                `(${this.pullRequestBranch}) 3/6 :ok: All prerequisites has passed.`);
-        }
     }
 
     private async checkIfBranchHasRequiredFunctionality() {
         const enoughInformation = new BranchHasRequiredFunctionality(this.output, this.input);
         await enoughInformation.execute();
-
-        if(this.notifier) {
-            this.notifier.notifyInfo(
-                this.pullRequestAuthor,
-                `(${this.pullRequestBranch}) 4/6 :ok: Branch has required functionality (problem was solved).`);
-        }
     }
 
     private async checkIfBranchHasTests() {
         const enoughInformation = new BranchHasTests(this.output, this.input);
         await enoughInformation.execute();
-
-        if(this.notifier) {
-            this.notifier.notifyInfo(
-                this.pullRequestAuthor,
-                `(${this.pullRequestBranch}) 5/6 :ok: Branch has correct tests.`);
-        }
     }
 
     private async checkIfBranchHasCleanDesignAndCode() {
         const enoughInformation = new BranchHasCleanDesignAndCode(this.output, this.input);
         await enoughInformation.execute();
-
-        if(this.notifier) {
-            await this.notifier.notifyInfo(
-                this.pullRequestAuthor,
-                `(${this.pullRequestBranch}) 6/6 :ok: Branch has clean design and code. Good job!`);
-        }
     }
 
     private async denyPullRequest(currentCommitHash: string, e) {
@@ -168,8 +137,13 @@ export class ApplicationExecutor implements IApplicationExecutor {
     }
 
     private async notifyReviewerAboutDeniedPullRequest(message) {
+        const additionalMessage = await this.input.askUser(
+            "(Slack) Send message to the author? Add additional message for the author (or exit CTRL-C)"
+        );
         if (this.notifier) {
-            return await this.notifier.notifyError(this.pullRequestAuthor, message);
+            return await this.notifier.notifyError(
+                this.pullRequestAuthor, `${message} Additional message: ${additionalMessage}`
+            );
         }
     }
 

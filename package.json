@@ -7,7 +7,7 @@
     "start": "ts-node ./src/app",
     "test": "mocha -r ts-node/register ./src/app/**/*.spec.ts"
   },
-  "bin": "./src/app/index.js",
+  "bin": "./dist/index.js",
   "author": "",
   "license": "ISC",
   "dependencies": {
