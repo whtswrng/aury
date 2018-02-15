@@ -23,10 +23,10 @@ export class ApplicationExecutor implements IApplicationExecutor {
     }
 
     public async start() {
-        await this.checkIfGitStatusIsClean();
         const currentCommitHash = await this.git.getCurrentCommitHash();
 
         try {
+            await this.checkIfGitStatusIsClean();
             this.pullRequestBranch = await this.getBranchFromUser();
 
             await this.processSlackMessage();
