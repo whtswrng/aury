@@ -23,29 +23,32 @@ export class ApplicationExecutor implements IApplicationExecutor {
     }
 
     public async start() {
+        await this.checkIfGitStatusIsClean();
         const currentCommitHash = await this.git.getCurrentCommitHash();
 
         try {
             this.pullRequestBranch = await this.getBranchFromUser();
 
-            if (this.config.tokens.slack) {
-                this.pullRequestAuthor = await this.input.askUser(
-                    'Type slack user name of the author of pull request: '
-                );
-                const sendMessageAboutStartingReview = await this.input.askUser(
-                    'Send message about starting review?: '
-                );
-                if(sendMessageAboutStartingReview === 'yes') {
-                    await this.notifyAuthorAboutStartingReview();
-                }
-            }
-
-            await this.checkIfGitStatusIsClean();
+            await this.processSlackMessage();
             await this.checkAllRules();
             await this.restoreGitToPreviousState(currentCommitHash);
             await this.approvePullRequest();
         } catch (e) {
             await this.denyPullRequest(currentCommitHash, e);
+        }
+    }
+
+    private async processSlackMessage() {
+        if (this.config.tokens.slack) {
+            this.pullRequestAuthor = await this.input.askUser(
+                'Type slack user name of the author of pull request: '
+            );
+            const sendMessageAboutStartingReview = await this.input.askUser(
+                'Send message about starting review? (yes/no) '
+            );
+            if (sendMessageAboutStartingReview === 'yes') {
+                await this.notifyAuthorAboutStartingReview();
+            }
         }
     }
 
@@ -88,7 +91,7 @@ export class ApplicationExecutor implements IApplicationExecutor {
 
     private async checkIfBranchMeetsAllPrerequisites() {
         const allPrerequisites = new BranchMeetsAllPrerequisites(
-            this.output, this.config.prerequisites, new ChildProcessExecutor()
+            this.output, this.config.prerequisites, this.input, new ChildProcessExecutor()
         );
         await allPrerequisites.execute();
     }
