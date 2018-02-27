@@ -44,7 +44,22 @@ async function start() {
     if(hasDefinedBranches()) {
         await startAuryApplication();
     } else {
+        if(process.argv[2] === 'status') {
+            return await printStatus();
+        }
         output.log('You have to insert branches in format `aury $BRANCH $BASE_BRANCH` or insert command.');
+    }
+}
+
+async function printStatus() {
+    const status = await storage.getStatus();
+
+    if(! status.inProgress.length) {
+        output.log('There are no code review in progress.');
+    } else {
+        output.log('Some code reviews are in progress:');
+        const printableResult = status.inProgress.map((record) => `     ${record.branch} => ${record.baseBranch}`);
+        printableResult.forEach((result) => output.warning(result));
     }
 }
 
