@@ -1,5 +1,6 @@
 export interface IConfig {
     prerequisites: prerequisites;
+    questions: Array<string>;
     tokens: {
         slack: string;
     }

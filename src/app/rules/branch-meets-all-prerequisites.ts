@@ -13,11 +13,11 @@ export class BranchMeetsAllPrerequisites {
 
     async execute() {
         try {
-            this.output.info('3/6 Are all prerequisites passing?');
+            this.output.info('2/6 Are all prerequisites passing?');
             await this.runPrerequisites(this.prerequisites);
-            this.output.ok('3) Branch successfully meets all prerequisites.');
+            this.output.ok('2) Branch successfully meets all prerequisites.');
         } catch (e) {
-            this.output.error(`3) Some prerequisite is not passing.`);
+            this.output.error(`2 Some prerequisite is not passing.`);
             throw e;
         }
     }
