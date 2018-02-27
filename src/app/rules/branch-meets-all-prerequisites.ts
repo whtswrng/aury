@@ -23,6 +23,9 @@ export class BranchMeetsAllPrerequisites {
     }
 
     private async runPrerequisites(scripts) {
+        if(scripts.length === 0){
+            return;
+        }
         const script = scripts.shift();
 
         this.output.info(`          running script "${script}", ${scripts.length} are left.`);

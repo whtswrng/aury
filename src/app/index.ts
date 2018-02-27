@@ -2,7 +2,7 @@
 import {Git} from "./services/version-control-system/git";
 import {readFile} from "fs";
 import {IConfig} from "./config.interface";
-import {ApplicationExecutor} from "./application-executor";
+import {Application} from "./application";
 import {IInput} from "./services/input-output/input.interface";
 import {IOutput} from "./services/input-output/output.interface";
 import {StringColorizer} from "./services/string-colorizer/string-colorizer";
@@ -15,24 +15,44 @@ import {INotifier} from "./services/notifiers/notifier.interface";
 
 const CONFIG_FILE_NAME = 'aury.config.json';
 
+let output: IOutput;
+let git: Git;
+let input: IInput;
+
+initDependencies();
 start();
 
+function initDependencies() {
+    git = new Git(new ChildProcessExecutor());
+    const stringColorizer: IStringColorizer = new StringColorizer();
+    output = new Console(stringColorizer);
+    input = new Console(stringColorizer);
+}
+
 async function start() {
-    let output: IOutput;
+    if(hasDefinedBranches()) {
+        await startAuryApplication();
+    } else {
+        output.log('You have to insert branches in format `aury $BRANCH $BASE_BRANCH` or insert command.');
+    }
+}
+
+async function startAuryApplication() {
     try {
-        const git: Git = new Git(new ChildProcessExecutor());
-        const stringColorizer: IStringColorizer = new StringColorizer();
-        output = new Console(stringColorizer);
-        const input: IInput = new Console(stringColorizer);
         const config: IConfig = await getConfig();
         const notifier = getNotifier(config);
+        const application = new Application(input, output, git, config, notifier);
 
-        const application = new ApplicationExecutor(input, output, git, config, notifier);
         await application.start();
     } catch (e) {
         output.error(e.message);
     }
 }
+
+function hasDefinedBranches() {
+    return typeof process.argv[2] === 'string' && typeof process.argv[3] === 'string';
+}
+
 
 async function getConfig(): Promise<IConfig> {
     const rawFileData = await readFilePromisified(CONFIG_FILE_NAME);

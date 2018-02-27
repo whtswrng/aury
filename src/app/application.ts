@@ -2,24 +2,22 @@ import {Git} from "./services/version-control-system/git";
 import {BranchUpToDateWithBaseBranch} from "./rules/branch-up-to-date-with-base-branch";
 import {BranchMeetsAllPrerequisites} from "./rules/branch-meets-all-prerequisites";
 import {IConfig} from "./config.interface";
-import {IApplicationExecutor} from "./application-executor.interface";
 import {IInput} from "./services/input-output/input.interface";
 import {IOutput} from "./services/input-output/output.interface";
 import {ChildProcessExecutor} from "./services/command-executor/child-process-executor";
 import {INotifier} from "./services/notifiers/notifier.interface";
 import {Question} from "./rules/question";
 
-export class ApplicationExecutor implements IApplicationExecutor {
+export class Application {
 
     private pullRequestAuthor?: string;
 
-    constructor(private input: IInput, private output: IOutput, private git: Git,
-                private config: IConfig, private notifier?: INotifier) {
+    constructor(private input: IInput, private output: IOutput, private git: Git, private config: IConfig,
+                private notifier?: INotifier) {
 
     }
 
     public async start() {
-        this.assertProcessArguments();
         const currentCommitHash = await this.git.getCurrentCommitHash();
         await this.notifyUserIfGitStatusIsNotClean();
 
@@ -49,17 +47,11 @@ export class ApplicationExecutor implements IApplicationExecutor {
         }
     }
 
-    private assertProcessArguments() {
-        if(typeof process.argv[2] !== 'string' || typeof process.argv[3] !== 'string') {
-            throw new Error('You have to provide branch parameters: "aury $BRANCH $BASE_BRANCH"');
-        }
-    }
-
     private async notifyUserIfGitStatusIsNotClean() {
         try {
             await this.checkIfGitStatusIsClean();
         } catch (e) {
-            this.output.info('Git status is not clean! Aury could be in trouble because of that!');
+            this.output.warning('Git status is not clean! Aury could be in trouble because of that!');
         }
     }
 

@@ -5,7 +5,7 @@ import {IInput} from "./input.interface";
 
 export class Console implements IOutput, IInput{
 
-    constructor(private stringPainter: IStringColorizer) {
+    constructor(private stringColorizer: IStringColorizer) {
 
     }
 
@@ -17,7 +17,7 @@ export class Console implements IOutput, IInput{
                 terminal: false
             });
 
-            rl.question(this.stringPainter.info(question), (answer) => {
+            rl.question(this.stringColorizer.info(question), (answer) => {
                 resolve(answer);
                 rl.close();
             });
@@ -25,15 +25,23 @@ export class Console implements IOutput, IInput{
     }
 
     public info(string) {
-        console.log(this.stringPainter.info(string))
+        console.log(this.stringColorizer.info(string))
     }
 
     public error(string) {
-        console.log(this.stringPainter.error(`✘    ${string}`));
+        console.log(this.stringColorizer.error(`✘    ${string}`));
+    }
+
+    public warning(string) {
+        console.log(this.stringColorizer.warning(`${string}`));
     }
 
     public ok(string) {
-        console.log(this.stringPainter.ok(`ᶘ   ${string}`));
+        console.log(this.stringColorizer.ok(`ᶘ   ${string}`));
+    }
+
+    public log(string) {
+        console.log(string);
     }
 
 }

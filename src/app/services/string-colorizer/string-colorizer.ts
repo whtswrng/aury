@@ -21,6 +21,10 @@ export class StringColorizer implements IStringColorizer{
         return string.info;
     }
 
+    public warning(string) {
+        return string.warn;
+    }
+
     public error(string) {
         return string.error;
     }
