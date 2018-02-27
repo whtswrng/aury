@@ -7,13 +7,14 @@ import {IOutput} from "./services/input-output/output.interface";
 import {ChildProcessExecutor} from "./services/command-executor/child-process-executor";
 import {INotifier} from "./services/notifiers/notifier.interface";
 import {Question} from "./rules/question";
+import {StatusStorage} from "./services/storage/status-storage";
 
 export class Application {
 
     private pullRequestAuthor?: string;
 
     constructor(private input: IInput, private output: IOutput, private git: Git, private config: IConfig,
-                private notifier?: INotifier) {
+                private storage: StatusStorage, private notifier?: INotifier) {
 
     }
 
@@ -31,17 +32,17 @@ export class Application {
     private async checkPrerequisites() {
         try {
             await this.assertBranchMeetsAllPrerequisites();
-        } catch (e) {
-
-        }
+        } catch (e) {}
     }
 
     private async startProcessing(currentCommitHash: string) {
         try {
-            await this.processSlackMessage();
+            await this.sendSlackMessageIfNeccesary();
+            await this.storage.addCodeReviewToInProgress(this.getBranch(), this.getBaseBranch());
             await this.checkAllRules();
             await this.restoreGitToPreviousState(currentCommitHash);
             await this.approvePullRequest();
+            await this.storage.removeCodeReviewFromInProgress(this.getBranch(), this.getBaseBranch());
         } catch (e) {
             await this.denyPullRequest(currentCommitHash, e);
         }
@@ -55,17 +56,19 @@ export class Application {
         }
     }
 
-    private async processSlackMessage() {
+    private async sendSlackMessageIfNeccesary() {
         if (this.config.tokens && this.config.tokens.slack) {
             this.pullRequestAuthor = await this.input.askUser(
                 'Type slack user name of the author of pull request: '
             );
-            const sendMessageAboutStartingReview = await this.input.askUser(
-                'Send message about starting review? (yes/no) '
-            );
-            if (sendMessageAboutStartingReview === 'yes') {
-                await this.notifyAuthorAboutStartingReview();
-            }
+            await this.sendSlackMessageIfCodeReviewIsNotInProgress();
+
+        }
+    }
+
+    private async sendSlackMessageIfCodeReviewIsNotInProgress() {
+        if (!await this.storage.isCodeReviewInProgress(this.getBranch(), this.getBaseBranch())) {
+            await this.notifyAuthorAboutStartingReview();
         }
     }
 

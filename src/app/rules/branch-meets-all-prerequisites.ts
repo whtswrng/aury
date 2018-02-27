@@ -47,10 +47,10 @@ export class BranchMeetsAllPrerequisites {
     }
 
     private async askForRetry(script) {
-        const answer = await this.input.askUser('Do you want to run this script again? (yes/no/continue)');
+        const answer = await this.input.askUser('Do you want to run this script again? (yes/no/skip)');
         if (answer === 'yes') {
             await this.runScript(script);
-        } else if(answer === 'continue'){
+        } else if(answer === 'skip'){
             // pretend everything is OK
         } else {
             throw new Error(`script "${script}" has not finished well.`);

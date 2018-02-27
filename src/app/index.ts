@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import {Git} from "./services/version-control-system/git";
-import {readFile} from "fs";
+import {readFile, existsSync, mkdirSync} from "fs";
 import {IConfig} from "./config.interface";
 import {Application} from "./application";
 import {IInput} from "./services/input-output/input.interface";
@@ -12,14 +12,18 @@ import {ChildProcessExecutor} from "./services/command-executor/child-process-ex
 import {SlackNotifier} from "./services/notifiers/slack-notifier";
 import {HttpRequester} from "./services/requesters/http-requester";
 import {INotifier} from "./services/notifiers/notifier.interface";
+import {readFilePromisified, StatusStorage} from "./services/storage/status-storage";
 
 const CONFIG_FILE_NAME = 'aury.config.json';
+const STORAGE_DIR = __dirname + '/.aury';
 
 let output: IOutput;
 let git: Git;
 let input: IInput;
+let storage: StatusStorage;
 
 initDependencies();
+initStorageDirectory();
 start();
 
 function initDependencies() {
@@ -27,6 +31,13 @@ function initDependencies() {
     const stringColorizer: IStringColorizer = new StringColorizer();
     output = new Console(stringColorizer);
     input = new Console(stringColorizer);
+    storage = new StatusStorage(STORAGE_DIR);
+}
+
+function initStorageDirectory() {
+    if( ! existsSync(STORAGE_DIR)) {
+        mkdirSync(STORAGE_DIR);
+    }
 }
 
 async function start() {
@@ -41,7 +52,7 @@ async function startAuryApplication() {
     try {
         const config: IConfig = await getConfig();
         const notifier = getNotifier(config);
-        const application = new Application(input, output, git, config, notifier);
+        const application = new Application(input, output, git, config, storage, notifier);
 
         await application.start();
     } catch (e) {
@@ -53,18 +64,9 @@ function hasDefinedBranches() {
     return typeof process.argv[2] === 'string' && typeof process.argv[3] === 'string';
 }
 
-
 async function getConfig(): Promise<IConfig> {
     const rawFileData = await readFilePromisified(CONFIG_FILE_NAME);
     return parseConfigFile(rawFileData);
-}
-
-function readFilePromisified(filePath): Promise<string> {
-    return new Promise((resolve, reject) => {
-        readFile(filePath, (err, data) => {
-            return !err && !!data ? resolve(data.toString()) : reject(err);
-        })
-    });
 }
 
 function parseConfigFile(rawFileData: string): IConfig {
