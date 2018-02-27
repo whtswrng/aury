@@ -13,6 +13,7 @@ import {SlackNotifier} from "./services/notifiers/slack-notifier";
 import {HttpRequester} from "./services/requesters/http-requester";
 import {INotifier} from "./services/notifiers/notifier.interface";
 import {readFilePromisified, StatusStorage} from "./services/storage/status-storage";
+import {ReviewStorage} from "./services/storage/review-storage";
 
 const CONFIG_FILE_NAME = 'aury.config.json';
 const STORAGE_DIR = __dirname + '/.aury';
@@ -20,7 +21,8 @@ const STORAGE_DIR = __dirname + '/.aury';
 let output: IOutput;
 let git: Git;
 let input: IInput;
-let storage: StatusStorage;
+let statusStorage: StatusStorage;
+let reviewStorage: ReviewStorage;
 
 initDependencies();
 initStorageDirectory();
@@ -31,7 +33,8 @@ function initDependencies() {
     const stringColorizer: IStringColorizer = new StringColorizer();
     output = new Console(stringColorizer);
     input = new Console(stringColorizer);
-    storage = new StatusStorage(STORAGE_DIR);
+    statusStorage = new StatusStorage(STORAGE_DIR);
+    reviewStorage = new ReviewStorage(STORAGE_DIR);
 }
 
 function initStorageDirectory() {
@@ -45,16 +48,19 @@ async function start() {
         await startAuryApplication();
     } else {
         if(process.argv[2] === 'status') {
-            return await printStatus();
+            await printStatus();
+        } else if (process.argv[2] === 'reviews') {
+            await printReviews();
+        } else {
+            output.log('You have to insert branches in format `aury $BRANCH $BASE_BRANCH` or insert command.');
         }
-        output.log('You have to insert branches in format `aury $BRANCH $BASE_BRANCH` or insert command.');
     }
 }
 
 async function printStatus() {
-    const status = await storage.getStatus();
+    const status = await statusStorage.getStatus();
 
-    if(! status.inProgress.length) {
+    if(! status || !status.inProgress || ! status.inProgress.length) {
         output.log('There are no code review in progress.');
     } else {
         output.log('Some code reviews are in progress:');
@@ -63,11 +69,23 @@ async function printStatus() {
     }
 }
 
+async function printReviews() {
+    const reviews = await reviewStorage.getMonthReviews();
+
+    if(! reviews || ! reviews.length) {
+        output.log('There are no finished code reviews for this month.');
+    } else {
+        output.log(`There are ${reviews.length} finished code reviews for this month: `);
+        const printableResult = reviews.map((record) => `     ${record.branch} => ${record.baseBranch}`);
+        printableResult.forEach((result) => output.ok(result));
+    }
+}
+
 async function startAuryApplication() {
     try {
         const config: IConfig = await getConfig();
         const notifier = getNotifier(config);
-        const application = new Application(input, output, git, config, storage, notifier);
+        const application = new Application(input, output, git, config, statusStorage, reviewStorage, notifier);
 
         await application.start();
     } catch (e) {

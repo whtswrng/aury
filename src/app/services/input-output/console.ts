@@ -37,7 +37,7 @@ export class Console implements IOutput, IInput{
     }
 
     public ok(string) {
-        console.log(this.stringColorizer.ok(`ᶘ   ${string}`));
+        console.log(this.stringColorizer.ok(`    ${string}`));
     }
 
     public log(string) {

@@ -8,13 +8,14 @@ import {ChildProcessExecutor} from "./services/command-executor/child-process-ex
 import {INotifier} from "./services/notifiers/notifier.interface";
 import {Question} from "./rules/question";
 import {StatusStorage} from "./services/storage/status-storage";
+import {ReviewStorage} from "./services/storage/review-storage";
 
 export class Application {
 
     private pullRequestAuthor?: string;
 
     constructor(private input: IInput, private output: IOutput, private git: Git, private config: IConfig,
-                private storage: StatusStorage, private notifier?: INotifier) {
+                private statusStorage: StatusStorage, private reviewStorage: ReviewStorage, private notifier?: INotifier) {
 
     }
 
@@ -38,11 +39,12 @@ export class Application {
     private async startProcessing(currentCommitHash: string) {
         try {
             await this.sendSlackMessageIfNeccesary();
-            await this.storage.addCodeReviewToInProgress(this.getBranch(), this.getBaseBranch());
+            await this.statusStorage.addCodeReviewToInProgress(this.getBranch(), this.getBaseBranch());
             await this.checkAllRules();
             await this.restoreGitToPreviousState(currentCommitHash);
             await this.approvePullRequest();
-            await this.storage.removeCodeReviewFromInProgress(this.getBranch(), this.getBaseBranch());
+            await this.statusStorage.removeCodeReviewFromInProgress(this.getBranch(), this.getBaseBranch());
+            await this.reviewStorage.addFinishedReview(this.getBranch(), this.getBaseBranch());
         } catch (e) {
             await this.denyPullRequest(currentCommitHash, e);
         }
@@ -67,7 +69,7 @@ export class Application {
     }
 
     private async sendSlackMessageIfCodeReviewIsNotInProgress() {
-        if (!await this.storage.isCodeReviewInProgress(this.getBranch(), this.getBaseBranch())) {
+        if (!await this.statusStorage.isCodeReviewInProgress(this.getBranch(), this.getBaseBranch())) {
             await this.notifyAuthorAboutStartingReview();
         }
     }
