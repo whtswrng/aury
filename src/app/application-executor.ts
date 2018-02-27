@@ -22,7 +22,20 @@ export class ApplicationExecutor implements IApplicationExecutor {
         this.assertProcessArguments();
         const currentCommitHash = await this.git.getCurrentCommitHash();
         await this.notifyUserIfGitStatusIsNotClean();
-        await this.startProcessing(currentCommitHash);
+
+        if(process.argv[4] === '--pre') {
+            await this.checkPrerequisites();
+        } else {
+            await this.startProcessing(currentCommitHash);
+        }
+    }
+
+    private async checkPrerequisites() {
+        try {
+            await this.assertBranchMeetsAllPrerequisites();
+        } catch (e) {
+
+        }
     }
 
     private async startProcessing(currentCommitHash: string) {
@@ -38,7 +51,7 @@ export class ApplicationExecutor implements IApplicationExecutor {
 
     private assertProcessArguments() {
         if(typeof process.argv[2] !== 'string' || typeof process.argv[3] !== 'string') {
-            throw new Error('Missing branches arguments.');
+            throw new Error('You have to provide branch parameters: "aury $BRANCH $BASE_BRANCH"');
         }
     }
 
