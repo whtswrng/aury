@@ -18,15 +18,20 @@ const CONFIG_FILE_NAME = 'aury.config.json';
 start();
 
 async function start() {
-    const git: Git = new Git(new ChildProcessExecutor());
-    const stringColorizer: IStringColorizer = new StringColorizer();
-    const output: IOutput = new Console(stringColorizer);
-    const input: IInput = new Console(stringColorizer);
-    const config: IConfig = await getConfig();
-    const notifier = getNotifier(config);
+    let output: IOutput;
+    try {
+        const git: Git = new Git(new ChildProcessExecutor());
+        const stringColorizer: IStringColorizer = new StringColorizer();
+        output = new Console(stringColorizer);
+        const input: IInput = new Console(stringColorizer);
+        const config: IConfig = await getConfig();
+        const notifier = getNotifier(config);
 
-    const application = new ApplicationExecutor(input, output, git, config, notifier);
-    application.start();
+        const application = new ApplicationExecutor(input, output, git, config, notifier);
+        await application.start();
+    } catch (e) {
+        output.error(e.message);
+    }
 }
 
 async function getConfig(): Promise<IConfig> {

@@ -40,14 +40,17 @@ export class BranchMeetsAllPrerequisites {
         } catch (e) {
             console.log(e);
             await this.askForRetry(script);
-            throw new Error(`script "${script}" has not finished well.`);
         }
     }
 
     private async askForRetry(script) {
-        const answer = this.input.askUser('Do you want to run this script again? (yes/no)');
+        const answer = await this.input.askUser('Do you want to run this script again? (yes/no/continue)');
         if (answer === 'yes') {
             await this.runScript(script);
+        } else if(answer === 'continue'){
+            // pretend everything is OK
+        } else {
+            throw new Error(`script "${script}" has not finished well.`);
         }
     }
 

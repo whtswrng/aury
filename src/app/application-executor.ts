@@ -1,5 +1,5 @@
 import {Git} from "./services/version-control-system/git";
-import {BranchUpToDateWithMaster} from "./rules/branch-up-to-date-with-master";
+import {BranchUpToDateWithBaseBranch} from "./rules/branch-up-to-date-with-base-branch";
 import {EnoughInformationInPullRequest} from "./rules/enough-information-in-pull-request";
 import {BranchMeetsAllPrerequisites} from "./rules/branch-meets-all-prerequisites";
 import {BranchHasRequiredFunctionality} from "./rules/branch-has-required-functionality";
@@ -23,11 +23,15 @@ export class ApplicationExecutor implements IApplicationExecutor {
     }
 
     public async start() {
+        this.assertProcessArguments();
         const currentCommitHash = await this.git.getCurrentCommitHash();
+        await this.notifyUserIfGitStatusIsNotClean();
+        await this.startProcessing(currentCommitHash);
+    }
 
+    private async startProcessing(currentCommitHash: string) {
         try {
-            await this.checkIfGitStatusIsClean();
-            this.pullRequestBranch = await this.getBranchFromUser();
+            this.pullRequestBranch = this.getBranch();
 
             await this.processSlackMessage();
             await this.checkAllRules();
@@ -38,8 +42,22 @@ export class ApplicationExecutor implements IApplicationExecutor {
         }
     }
 
+    private assertProcessArguments() {
+        if(typeof process.argv[2] !== 'string' || typeof process.argv[3] !== 'string') {
+            throw new Error('Missing branches arguments.');
+        }
+    }
+
+    private async notifyUserIfGitStatusIsNotClean() {
+        try {
+            await this.checkIfGitStatusIsClean();
+        } catch (e) {
+            this.output.info('Git status is not clean! Aury could be in trouble because of that!');
+        }
+    }
+
     private async processSlackMessage() {
-        if (this.config.tokens.slack) {
+        if (this.config.tokens && this.config.tokens.slack) {
             this.pullRequestAuthor = await this.input.askUser(
                 'Type slack user name of the author of pull request: '
             );
@@ -52,9 +70,12 @@ export class ApplicationExecutor implements IApplicationExecutor {
         }
     }
 
-    private async getBranchFromUser() {
-        const insertBranchNameString = 'Please insert branch name for code review: ';
-        return this.input.askUser(insertBranchNameString);
+    private getBranch(): string {
+        return process.argv[2];
+    }
+
+    private getBaseBranch(): string {
+        return process.argv[3];
     }
 
     private async notifyAuthorAboutStartingReview() {
@@ -80,7 +101,9 @@ export class ApplicationExecutor implements IApplicationExecutor {
     }
 
     private async checkIfBranchIsUpToDateWithMaster() {
-        const branchUpToDateWithMaster = new BranchUpToDateWithMaster(this.pullRequestBranch, this.output, this.input, this.git);
+        const branchUpToDateWithMaster = new BranchUpToDateWithBaseBranch(
+            this.pullRequestBranch, this.getBaseBranch(), this.output, this.input, this.git
+        );
         await branchUpToDateWithMaster.execute();
     }
 
