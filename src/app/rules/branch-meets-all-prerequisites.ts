@@ -39,7 +39,7 @@ export class BranchMeetsAllPrerequisites {
 
     private async runScript(script) {
         try {
-            await this.commandExecutor.exec(`npm run ${script}`);
+            await this.commandExecutor.exec(script);
         } catch (e) {
             console.log(e);
             await this.askForRetry(script);
