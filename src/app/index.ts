@@ -16,7 +16,7 @@ import {readFilePromisified, StatusStorage} from "./services/storage/status-stor
 import {ReviewStorage} from "./services/storage/review-storage";
 
 const CONFIG_FILE_NAME = 'aury.config.json';
-const STORAGE_DIR = __dirname + '/.aury';
+const STORAGE_DIR = '.aury';
 
 let output: IOutput;
 let git: Git;
