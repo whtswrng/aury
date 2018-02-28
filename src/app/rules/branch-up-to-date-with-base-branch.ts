@@ -17,28 +17,35 @@ export class BranchUpToDateWithBaseBranch {
 
             this.printer.ok(`Branch ${this.branch} can be merged with ${this.baseBranch}.`);
         } catch (e) {
+            this.printMergeError();
             await this.handleError(e);
         }
     }
 
     private async handleError(e) {
-        if (await this.canTryHardResetWithOrigin()) {
+        const answer = await this.canTryHardResetWithOrigin();
+
+        if (answer === 'yes') {
             await this.hardResetAndTryAgain();
+        } else if (answer === 'skip'){
+            // pretend everything is ok
         } else {
-            this.printMergeError();
-            throw e;
+            throw new Error(this.getErrorMessage());
         }
     }
 
     private printMergeError() {
-        this.printer.error(`Branch ${this.branch} cannot be merged with ${this.baseBranch}.`);
+        this.printer.error(this.getErrorMessage());
     }
 
-    private async canTryHardResetWithOrigin(): Promise<boolean> {
-        const answer = await this.input.askUser(
-            `Cannot do fast forward merge with ${this.baseBranch}. Can i try hard reset with origin?`
+    private getErrorMessage(): string {
+        return `Branch ${this.branch} cannot be merged with ${this.baseBranch}.`;
+    }
+
+    private async canTryHardResetWithOrigin(): Promise<string> {
+        return this.input.askUser(
+            `Cannot do fast forward merge with ${this.baseBranch}. Can i try hard reset with origin? (yes/no/skip)`
         );
-        return answer === 'yes';
     }
 
     private async hardResetAndTryAgain() {
@@ -47,6 +54,7 @@ export class BranchUpToDateWithBaseBranch {
             await this.git.mergeFastForward(this.baseBranch, this.branch);
         } catch (e) {
             this.printMergeError();
+            throw new Error(this.getErrorMessage());
         }
     }
 

@@ -10,7 +10,7 @@ import {Question} from "./rules/question";
 import {StatusStorage} from "./services/storage/status-storage";
 import {ReviewStorage} from "./services/storage/review-storage";
 
-const MAX_STEPS_WITHOUT_QUESTIONS = 3;
+const MAX_STEPS_WITHOUT_QUESTIONS = 2;
 
 export class Application {
 
@@ -95,21 +95,37 @@ export class Application {
 
     private getStepsCount(): number {
         if(this.config && this.config.questions) {
-            return this.config.questions.length;
+            return this.config.questions.length + MAX_STEPS_WITHOUT_QUESTIONS;
         }
 
         return MAX_STEPS_WITHOUT_QUESTIONS;
     }
 
+    private getQuestions(): Array<string> {
+        if(this.config && this.config.questions) {
+            return this.config.questions;
+        }
+
+        return [];
+    }
+
+    private getPrerequisites(): Array<string> {
+        if(this.config && this.config.prerequisites) {
+            return this.config.prerequisites;
+        }
+
+        return [];
+    }
+
     private async assertBranchMeetsAllPrerequisites() {
         const allPrerequisites = new BranchMeetsAllPrerequisites(
-            this.output, this.config.prerequisites, this.input, new ChildProcessExecutor(), this.getStepsCount()
+            this.output, this.getPrerequisites(), this.input, new ChildProcessExecutor(), this.getStepsCount()
         );
         await allPrerequisites.execute();
     }
 
     private async assertBranchMeetsAllQuestions() {
-        const questions = this.config.questions || [];
+        const questions = this.getQuestions();
 
         for(let i = 0; i < questions.length; i++) {
             await this.assertBranchMeetsQuestion(i, questions);
@@ -145,7 +161,7 @@ export class Application {
     }
 
     private async approvePullRequest() {
-        const message = `Pull request on ${this.getBranch()} was approved.`;
+        const message = `Pull request on branch ${this.getBranch()} was approved.`;
         this.output.ok(`\n${message}`);
         await this.notifier.notifyAuthorAboutApprovedPullRequest(this.getBranch());
     }

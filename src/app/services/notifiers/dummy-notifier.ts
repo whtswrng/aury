@@ -7,11 +7,14 @@ export class DummyNotifier implements INotifier {
     }
 
     notifyAuthorAboutDeniedPullRequest(branch: string, errorMessage: string): Promise<void> {
+        console.log(errorMessage);
         return null;
     }
+
     notifyAuthorAboutStartingReview(branch: string): Promise<void> {
         return null;
     }
+
     askOnPullRequestAuthor(): Promise<void> {
         return null;
     }

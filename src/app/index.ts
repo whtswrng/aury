@@ -51,7 +51,7 @@ async function initConfig() {
     try {
         config = await getConfig();
     } catch (e) {
-        output.log(`Cannot find configuration file '${CONFIG_FILE_NAME}'.`);
+        output.log(`Configuration file '${CONFIG_FILE_NAME}' not found or it's corrupted.`);
         throw e;
     }
 }
