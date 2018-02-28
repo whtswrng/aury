@@ -1,4 +1,5 @@
 import {readFile, writeFile} from "fs";
+import {CodeReview} from "./review-storage";
 
 const STATUS_FILE = '/status';
 
@@ -8,7 +9,7 @@ export class StatusStorage {
 
     }
 
-    public async getStatus(): Promise<Status>{
+    public async getStatus(): Promise<Status> {
         try {
             await this.createStatusFileIfDoesNotExist();
             const fileContent = await readFilePromisified(this.DIRECTORY + STATUS_FILE);
@@ -18,46 +19,91 @@ export class StatusStorage {
         }
     }
 
-    public async addCodeReviewToInProgress(branch, baseBranch): Promise<void>{
-        const parsedContent = await this.getStatus();
+    public async addCodeReviewToInProgress(branch: string, baseBranch: string, description: string): Promise<void> {
+        const status = await this.getStatus();
 
-        if (!parsedContent.inProgress) {
-            parsedContent.inProgress = [];
-            await this.saveStatus(parsedContent);
+        if (!status.inProgress) {
+            status.inProgress = [];
+            await this.saveStatus(status);
         } else {
-            await this.addCodeReviewIfDoesNotExist(parsedContent, branch, baseBranch);
+            await this.replaceExistingCodeReviewToInProgressIfExist(branch, baseBranch, description);
         }
     }
 
-    public async removeCodeReviewFromInProgress(branch, baseBranch): Promise<void>{
-        const parsedContent = await this.getStatus();
-        const codeReviewIndex = await this.findExistingCodeReviewIndex(branch, baseBranch);
+    private async replaceExistingCodeReviewToInProgressIfExist(branch: string, baseBranch: string, description: string) {
+        const status = await this.getStatus();
+        const pendingReview = await this.findExistingCodeReviewPendingIndex(branch, baseBranch);
 
-        if(codeReviewIndex !== -1) {
+        if (pendingReview !== -1) {
+            const pendingDescription = status.pending[pendingReview].description;
+            await this.removeCodeReviewFromInPending(branch, baseBranch);
+            await this.addCodeReviewToInProgressIfDoesNotExist(branch, baseBranch, pendingDescription);
+        } else {
+            await this.addCodeReviewToInProgressIfDoesNotExist(branch, baseBranch, description);
+        }
+    }
+
+    public async addPendingReview(branch: string, baseBranch: string, description: string): Promise<void> {
+        const parsedContent = await this.getStatus();
+
+        if (!parsedContent.pending) {
+            parsedContent.pending = [];
+            await this.saveStatus(parsedContent);
+        } else {
+            await this.addCodeReviewToPendingIfDoesNotExist(parsedContent, branch, baseBranch, description);
+        }
+    }
+
+    private async addCodeReviewToPendingIfDoesNotExist(parsedContent: Status, branch, baseBranch, description) {
+        const pendingIndex = await this.findExistingCodeReviewPendingIndex(branch, baseBranch);
+        const inProgressIndex = await this.findExistingCodeReviewInProgressIndex(branch, baseBranch);
+
+        if (inProgressIndex === -1 && pendingIndex === -1) {
+            parsedContent.pending.push({branch, baseBranch, description});
+            await this.saveStatus(parsedContent);
+        }
+    }
+
+    public async removeCodeReviewFromInProgress(branch, baseBranch): Promise<void> {
+        const parsedContent = await this.getStatus();
+        const codeReviewIndex = await this.findExistingCodeReviewInProgressIndex(branch, baseBranch);
+
+        if (codeReviewIndex !== -1) {
             parsedContent.inProgress.splice(codeReviewIndex, 1);
             await this.saveStatus(parsedContent);
         }
     }
 
-    public async isCodeReviewInProgress(branch, baseBranch): Promise<boolean> {
-        return await this.findExistingCodeReviewIndex(branch, baseBranch) !== -1;
-    }
+    public async removeCodeReviewFromInPending(branch, baseBranch): Promise<void> {
+        const parsedContent = await this.getStatus();
+        const codeReviewIndex = await this.findExistingCodeReviewPendingIndex(branch, baseBranch);
 
-    private async addCodeReviewIfDoesNotExist(parsedContent: Status, branch, baseBranch) {
-        const codeReviewIndex = await this.findExistingCodeReviewIndex(branch, baseBranch);
-
-        if(codeReviewIndex === -1) {
-            parsedContent.inProgress.push({branch, baseBranch});
+        if (codeReviewIndex !== -1) {
+            parsedContent.pending.splice(codeReviewIndex, 1);
             await this.saveStatus(parsedContent);
         }
     }
 
-    private async findExistingCodeReviewIndex(branch, baseBranch) {
+    public async isCodeReviewInProgress(branch, baseBranch): Promise<boolean> {
+        return await this.findExistingCodeReviewInProgressIndex(branch, baseBranch) !== -1;
+    }
+
+    private async addCodeReviewToInProgressIfDoesNotExist(branch, baseBranch, description) {
+        const codeReviewIndex = await this.findExistingCodeReviewInProgressIndex(branch, baseBranch);
+        const status = await this.getStatus();
+
+        if (codeReviewIndex === -1) {
+            status.inProgress.push({branch, baseBranch, description});
+            await this.saveStatus(status);
+        }
+    }
+
+    private async findExistingCodeReviewInProgressIndex(branch, baseBranch) {
         const parsedContent = await this.getStatus();
         let index = -1;
 
         parsedContent.inProgress.forEach((record, _index) => {
-            if(record.branch === branch && record.baseBranch === baseBranch) {
+            if (record.branch === branch && record.baseBranch === baseBranch) {
                 index = _index;
             }
         });
@@ -65,6 +111,18 @@ export class StatusStorage {
         return index;
     }
 
+    private async findExistingCodeReviewPendingIndex(branch, baseBranch) {
+        const parsedContent = await this.getStatus();
+        let index = -1;
+
+        parsedContent.pending.forEach((record, _index) => {
+            if (record.branch === branch && record.baseBranch === baseBranch) {
+                index = _index;
+            }
+        });
+
+        return index;
+    }
 
     private async createStatusFileIfDoesNotExist() {
         await createFileIfDoesNotExist(this.DIRECTORY + STATUS_FILE, JSON.stringify({inProgress: []}));
@@ -77,7 +135,8 @@ export class StatusStorage {
 }
 
 export interface Status {
-    inProgress: Array<any>;
+    inProgress: Array<CodeReview>;
+    pending: Array<CodeReview>;
 }
 
 export function readFilePromisified(filePath): Promise<string> {

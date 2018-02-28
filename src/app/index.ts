@@ -26,7 +26,6 @@ let statusStorage: StatusStorage;
 let reviewStorage: ReviewStorage;
 let config: IConfig;
 
-
 start();
 
 async function start() {
@@ -63,32 +62,52 @@ function initStorageDirectory() {
 }
 
 async function startJourney() {
-    if(hasBranchesInArguments()) {
-        await startAuryApplication();
-    } else {
-        await processCommands();
-    }
-}
-
-async function processCommands() {
-    if (process.argv[2] === 'status') {
+    if (process.argv[2] === '--status') {
         await printStatus();
-    } else if (process.argv[2] === 'reviews') {
+    } else if (process.argv[2] === '--reviews') {
         await printReviews();
+    } else if (process.argv[2] === '--delete') {
+        await deleteReview(process.argv[3], process.argv[4]);
+    } else if (process.argv[2] === '--add') {
+        await addPendingReview(process.argv[3], process.argv[4], process.argv[5]);
+    } else if (hasBranchesInArguments()) {
+        await startAuryApplication();
     } else {
         output.log('You have to insert branches in format `aury $BRANCH $BASE_BRANCH` or insert command.');
     }
 }
 
+async function addPendingReview(branch: string, baseBranch: string, description?: string) {
+    await statusStorage.addPendingReview(branch, baseBranch, description);
+}
+
+async function deleteReview(branch: string, baseBranch: string) {
+    await statusStorage.removeCodeReviewFromInProgress(branch, baseBranch);
+    await statusStorage.removeCodeReviewFromInPending(branch, baseBranch);
+}
+
 async function printStatus() {
+    await printReviewsInProgress();
+    await printReviewsInPending();
+}
+
+async function printReviewsInProgress() {
     const status = await statusStorage.getStatus();
 
-    if(! status || !status.inProgress || ! status.inProgress.length) {
-        output.log('There are no code review in progress.');
-    } else {
+    if(status && status.inProgress && status.inProgress.length) {
         output.log('Some code reviews are in progress:');
-        const printableResult = status.inProgress.map((record) => `     ${record.branch} => ${record.baseBranch}`);
+        const printableResult = status.inProgress.map((record) => `     ${record.branch} => ${record.baseBranch} (${record.description})`);
         printableResult.forEach((result) => output.warning(result));
+    }
+}
+
+async function printReviewsInPending() {
+    const status = await statusStorage.getStatus();
+
+    if(status && status.pending && status.pending.length) {
+        output.log('Some code reviews are still pending:');
+        const printableResult = status.pending.map((record) => `     (pending) ${record.branch} => ${record.baseBranch} (${record.description})`);
+        printableResult.forEach((result) => output.log(result));
     }
 }
 

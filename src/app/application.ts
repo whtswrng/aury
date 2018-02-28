@@ -39,7 +39,7 @@ export class Application {
     private async startProcessing(currentCommitHash: string) {
         try {
             await this.notifyAuthorAboutCodeReview();
-            await this.statusStorage.addCodeReviewToInProgress(this.getBranch(), this.getBaseBranch());
+            await this.statusStorage.addCodeReviewToInProgress(this.getBranch(), this.getBaseBranch(), this.getDescription());
             await this.checkAllRules();
             await this.restoreGitToPreviousState(currentCommitHash);
             await this.approvePullRequest();
@@ -72,6 +72,10 @@ export class Application {
 
     private getBaseBranch(): string {
         return process.argv[3];
+    }
+
+    private getDescription(): string {
+        return process.argv[4];
     }
 
     private async checkIfGitStatusIsClean() {

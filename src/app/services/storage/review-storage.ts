@@ -59,6 +59,7 @@ export interface Reviews {
 export interface CodeReview {
     branch: string;
     baseBranch: string;
+    description?: string;
 }
 
 export function readFilePromisified(filePath): Promise<string> {
