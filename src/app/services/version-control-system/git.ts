@@ -12,8 +12,7 @@ export class Git {
 
             return output.length === 0;
         } catch (e) {
-            console.log(e);
-            throw new Error(`Something went wrong while getting a commit hash.`);
+            throw new Error(`Git status is not clean. ${e.message}`);
         }
     }
 
@@ -21,8 +20,7 @@ export class Git {
         try {
             return await this.commandExecutor.exec(`git rev-parse HEAD`);
         } catch (e) {
-            console.log(e);
-            throw new Error(`Something went wrong while getting a commit hash.`);
+            throw new Error(`Something went wrong while getting a commit hash. ${e.message}`);
         }
     }
 
@@ -46,7 +44,6 @@ export class Git {
         try {
             await this.commandExecutor.exec(`git merge origin/${to} origin/${from} --no-commit`);
         } catch (e) {
-            console.log(e);
             throw new Error(`branch "${from}" cannot be merged with "${to}".`);
         }
     }
@@ -55,7 +52,6 @@ export class Git {
         try {
             await this.commandExecutor.exec(`git reset --hard origin/${branch}`);
         } catch (e) {
-            console.log(e);
             throw new Error(`branch "${branch}" cannot be reset --hard with origin.`);
         }
     }
@@ -64,7 +60,6 @@ export class Git {
         try {
             await this.commandExecutor.exec(`git pull`);
         } catch (e) {
-            console.log(e);
             throw new Error(e);
         }
     }
@@ -73,7 +68,6 @@ export class Git {
         try {
             await this.commandExecutor.exec(`git fetch`);
         } catch (e) {
-            console.log(e);
             throw new Error(e);
         }
     }

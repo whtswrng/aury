@@ -10,6 +10,8 @@ import {Question} from "./rules/question";
 import {StatusStorage} from "./services/storage/status-storage";
 import {ReviewStorage} from "./services/storage/review-storage";
 
+const MAX_STEPS_WITHOUT_QUESTIONS = 3;
+
 export class Application {
 
     constructor(private input: IInput, private output: IOutput, private git: Git, private config: IConfig,
@@ -86,9 +88,17 @@ export class Application {
 
     private async assertBranchIsMergeableWithBaseBranch() {
         const branchUpToDateWithMaster = new BranchUpToDateWithBaseBranch(
-            this.getBranch(), this.getBaseBranch(), this.output, this.input, this.git
+            this.getBranch(), this.getBaseBranch(), this.output, this.input, this.git, this.getStepsCount()
         );
         await branchUpToDateWithMaster.execute();
+    }
+
+    private getStepsCount(): number {
+        if(this.config && this.config.questions) {
+            return this.config.questions.length;
+        }
+
+        return MAX_STEPS_WITHOUT_QUESTIONS;
     }
 
     private async assertBranchMeetsAllPrerequisites() {

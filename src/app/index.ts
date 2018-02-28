@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import {Git} from "./services/version-control-system/git";
-import {readFile, existsSync, mkdirSync} from "fs";
+import {existsSync, mkdirSync} from "fs";
 import {IConfig} from "./config.interface";
 import {Application} from "./application";
 import {IInput} from "./services/input-output/input.interface";

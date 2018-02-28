@@ -4,18 +4,18 @@ import {IInput} from "../services/input-output/input.interface";
 export class BranchUpToDateWithBaseBranch {
 
     constructor(private branch: string, private baseBranch: string, private printer, private input: IInput,
-                private git: Git) {
+                private git: Git, private stepsCount: number) {
     }
 
     public async execute() {
-        this.printer.info(`1/6 Can be branch ${this.branch} properly merged with ${this.baseBranch} (without conflicts)`);
+        this.printer.info(`1/${this.stepsCount} Can be branch ${this.branch} properly merged with ${this.baseBranch} (without conflicts)`);
 
         try {
             await this.git.fetch();
             await this.git.checkoutTo(this.branch);
             await this.git.mergeFastForward(this.baseBranch, this.branch);
 
-            this.printer.ok(`1) Branch ${this.branch} can be merged with ${this.baseBranch}.`);
+            this.printer.ok(`Branch ${this.branch} can be merged with ${this.baseBranch}.`);
         } catch (e) {
             await this.handleError(e);
         }
@@ -31,7 +31,7 @@ export class BranchUpToDateWithBaseBranch {
     }
 
     private printMergeError() {
-        this.printer.error(`1) Branch ${this.branch} cannot be merged with ${this.baseBranch}.`);
+        this.printer.error(`Branch ${this.branch} cannot be merged with ${this.baseBranch}.`);
     }
 
     private async canTryHardResetWithOrigin(): Promise<boolean> {

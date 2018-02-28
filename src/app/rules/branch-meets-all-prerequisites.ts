@@ -41,7 +41,7 @@ export class BranchMeetsAllPrerequisites {
         try {
             await this.commandExecutor.exec(script);
         } catch (e) {
-            console.log(e);
+            this.output.error(e.message);
             await this.askForRetry(script);
         }
     }
