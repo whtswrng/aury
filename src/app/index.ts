@@ -14,6 +14,7 @@ import {HttpRequester} from "./services/requesters/http-requester";
 import {INotifier} from "./services/notifiers/notifier.interface";
 import {readFilePromisified, StatusStorage} from "./services/storage/status-storage";
 import {ReviewStorage} from "./services/storage/review-storage";
+import {DummyNotifier} from "./services/notifiers/dummy-notifier";
 
 const CONFIG_FILE_NAME = 'aury.config.json';
 const STORAGE_DIR = '.aury';
@@ -23,7 +24,7 @@ let git: Git;
 let input: IInput;
 let statusStorage: StatusStorage;
 let reviewStorage: ReviewStorage;
-let config: IConfig
+let config: IConfig;
 
 
 start();
@@ -33,11 +34,11 @@ async function start() {
         initDependencies();
         await initConfig();
         initStorageDirectory();
-        startJourney();
+        await startJourney();
     } catch (e) {}
 }
 
-async function initDependencies() {
+function initDependencies() {
     git = new Git(new ChildProcessExecutor());
     const stringColorizer: IStringColorizer = new StringColorizer();
     output = new Console(stringColorizer);
@@ -50,7 +51,7 @@ async function initConfig() {
     try {
         config = await getConfig();
     } catch (e) {
-        output.log('Cannot find configuration file `aury.config.json`.');
+        output.log(`Cannot find configuration file '${CONFIG_FILE_NAME}'.`);
         throw e;
     }
 }
@@ -129,8 +130,8 @@ function parseConfigFile(rawFileData: string): IConfig {
 
 function getNotifier(config: IConfig): INotifier {
     if (config && config.tokens && config.tokens.slack) {
-        return new SlackNotifier(config.tokens.slack, new HttpRequester());
+        return new SlackNotifier(config.tokens.slack, input, new HttpRequester());
     }
 
-    return null;
+    return new DummyNotifier();
 }

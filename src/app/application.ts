@@ -12,10 +12,8 @@ import {ReviewStorage} from "./services/storage/review-storage";
 
 export class Application {
 
-    private pullRequestAuthor?: string;
-
     constructor(private input: IInput, private output: IOutput, private git: Git, private config: IConfig,
-                private statusStorage: StatusStorage, private reviewStorage: ReviewStorage, private notifier?: INotifier) {
+                private statusStorage: StatusStorage, private reviewStorage: ReviewStorage, private notifier: INotifier) {
 
     }
 
@@ -38,7 +36,7 @@ export class Application {
 
     private async startProcessing(currentCommitHash: string) {
         try {
-            await this.sendSlackMessageIfNeccesary();
+            await this.notifyAuthorAboutCodeReview();
             await this.statusStorage.addCodeReviewToInProgress(this.getBranch(), this.getBaseBranch());
             await this.checkAllRules();
             await this.restoreGitToPreviousState(currentCommitHash);
@@ -58,19 +56,11 @@ export class Application {
         }
     }
 
-    private async sendSlackMessageIfNeccesary() {
-        if (this.config.tokens && this.config.tokens.slack) {
-            this.pullRequestAuthor = await this.input.askUser(
-                'Type slack user name of the author of pull request: '
-            );
-            await this.sendSlackMessageIfCodeReviewIsNotInProgress();
+    private async notifyAuthorAboutCodeReview() {
+        await this.notifier.askOnPullRequestAuthor();
 
-        }
-    }
-
-    private async sendSlackMessageIfCodeReviewIsNotInProgress() {
         if (!await this.statusStorage.isCodeReviewInProgress(this.getBranch(), this.getBaseBranch())) {
-            await this.notifyAuthorAboutStartingReview();
+            await this.notifier.notifyAuthorAboutStartingReview(this.getBranch());
         }
     }
 
@@ -80,13 +70,6 @@ export class Application {
 
     private getBaseBranch(): string {
         return process.argv[3];
-    }
-
-    private async notifyAuthorAboutStartingReview() {
-        await this.notifier.notifyInfo(
-            this.pullRequestAuthor,
-            `Just letting you know that someone is working on your pull request on branch ${this.getBranch()}.`
-        );
     }
 
     private async checkIfGitStatusIsClean() {
@@ -117,16 +100,21 @@ export class Application {
 
     private async assertBranchMeetsAllQuestions() {
         const questions = this.config.questions || [];
+
         for(let i = 0; i < questions.length; i++) {
-            const askAndAnswer = new Question(
-                this.input, this.buildQuestion(i, questions.length + 2)
-            );
-            await askAndAnswer.ask();
-            this.output.ok(`Answer on "${questions[i]}" was yes`);
+            await this.assertBranchMeetsQuestion(i, questions);
         }
     }
 
-    private buildQuestion(questionIndex: number, max: number): string {
+    private async assertBranchMeetsQuestion(i: number, questions: Array<string>) {
+        const askAndAnswer = new Question(
+            this.input, this.buildQuestionSentence(i, questions.length + 2)
+        );
+        await askAndAnswer.ask();
+        this.output.ok(`Answer on "${questions[i]}" was yes`);
+    }
+
+    private buildQuestionSentence(questionIndex: number, max: number): string {
         return `${questionIndex + 3}/${max}) ${this.config.questions[questionIndex]} (yes/no/skip)`;
     }
 
@@ -134,10 +122,7 @@ export class Application {
         const errorMessage = `Pull request on branch ${this.getBranch()} was denied, because of: "${e.message}"`;
         await this.restoreGitToPreviousState(currentCommitHash);
         this.output.error(errorMessage);
-
-        if(this.notifier) {
-            await this.notifyReviewerAboutDeniedPullRequest(errorMessage);
-        }
+        await this.notifier.notifyAuthorAboutDeniedPullRequest(this.getBranch(), errorMessage);
     }
 
     private async restoreGitToPreviousState(commit) {
@@ -150,21 +135,9 @@ export class Application {
     }
 
     private async approvePullRequest() {
-        const message = `Pull request on ${this.getBranch()} was approved. Congratulations c:`;
+        const message = `Pull request on ${this.getBranch()} was approved.`;
         this.output.ok(`\n${message}`);
-
-        if(this.notifier) {
-            await this.notifier.notifySuccess(this.pullRequestAuthor, message);
-        }
-    }
-
-    private async notifyReviewerAboutDeniedPullRequest(message) {
-        const additionalMessage = await this.input.askUser(
-            "(Slack) Send message to the author? Add additional message for the author (or exit CTRL-C)"
-        );
-        return await this.notifier.notifyError(
-            this.pullRequestAuthor, `${message} Additional message: ${additionalMessage}`
-        );
+        await this.notifier.notifyAuthorAboutApprovedPullRequest(this.getBranch());
     }
 
 }

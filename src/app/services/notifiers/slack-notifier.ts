@@ -1,15 +1,45 @@
 import {INotifier} from "./notifier.interface";
 import {IHttpRequester} from "../requesters/http-requester.interface";
+import {IInput} from "../input-output/input.interface";
 
 const SLACK_POST_MESSAGE_URL = 'https://slack.com/api/chat.postMessage';
 
 export class SlackNotifier implements INotifier {
 
-    constructor(private token: string, private requester: IHttpRequester) {
+    private pullRequestAuthor: string;
+
+    constructor(private token: string, private input: IInput, private requester: IHttpRequester) {
 
     }
 
-    public notifySuccess(user, message: string): Promise<void> {
+    public async notifyAuthorAboutApprovedPullRequest(branch: string): Promise<void> {
+        const message = `Pull request on ${branch} was approved.`;
+        await this.notifySuccess(this.pullRequestAuthor, message);
+    }
+
+    public async notifyAuthorAboutStartingReview(branch): Promise<void> {
+        await this.notifyInfo(
+            this.pullRequestAuthor,
+            `Just letting you know that someone is working on your pull request on branch ${branch}.`
+        );
+    }
+
+    public async notifyAuthorAboutDeniedPullRequest(branch: string, message: string): Promise<void> {
+        const additionalMessage = await this.input.askUser(
+            "(Slack) Send message about denial to the author? (yes = enter, no = CTRL+C). Additional message to the author:"
+        );
+        await this.notifyError(
+            this.pullRequestAuthor, `${message}. ${additionalMessage}`
+        );
+    }
+
+    public async askOnPullRequestAuthor(): Promise<void> {
+        this.pullRequestAuthor = await this.input.askUser(
+            'Type slack user name of the author of pull request: '
+        );
+    }
+
+    private notifySuccess(user, message: string): Promise<void> {
         const payload = {
             token: this.token,
             channel: `@${user}`,
@@ -24,7 +54,7 @@ export class SlackNotifier implements INotifier {
         }
     }
 
-    public notifyError(user, message: string): Promise<void> {
+    private notifyError(user, message: string): Promise<void> {
         const payload = {
             token: this.token,
             channel: `@${user}`,
@@ -40,7 +70,7 @@ export class SlackNotifier implements INotifier {
         }
     }
 
-    public notifyInfo(user, message: string): Promise<void> {
+    private notifyInfo(user, message: string): Promise<void> {
         const payload = {
             token: this.token,
             channel: `@${user}`,

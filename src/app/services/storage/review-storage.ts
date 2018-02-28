@@ -30,7 +30,6 @@ export class ReviewStorage {
         }
     }
 
-
     private async createReviewsFileIfDoesNotExist(): Promise<void> {
         await createFileIfDoesNotExist(this.DIRECTORY + REVIEWS_FILE, JSON.stringify({monthly: {}}));
     }
