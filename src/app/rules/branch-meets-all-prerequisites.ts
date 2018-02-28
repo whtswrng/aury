@@ -8,16 +8,17 @@ export class BranchMeetsAllPrerequisites {
     constructor(private output: IOutput,
                 private prerequisites: prerequisites,
                 private input: IInput,
-                private commandExecutor: ICommandExecutor) {
+                private commandExecutor: ICommandExecutor,
+                private stepsCount: number) {
     }
 
     async execute() {
         try {
-            this.output.info('2/6 Are all prerequisites passing?');
+            this.output.info(`2/${this.stepsCount} Are all prerequisites passing?`);
             await this.runPrerequisites(this.prerequisites);
-            this.output.ok('2) Branch successfully meets all prerequisites.');
+            this.output.ok('Branch successfully meets all prerequisites.');
         } catch (e) {
-            this.output.error(`2 Some prerequisite is not passing.`);
+            this.output.error(`Some prerequisite is not passing.`);
             throw e;
         }
     }
@@ -28,9 +29,9 @@ export class BranchMeetsAllPrerequisites {
         }
         const script = scripts.shift();
 
-        this.output.info(`          running script "${script}", ${scripts.length} are left.`);
+        this.output.info(`    running script "${script}", ${scripts.length} are left.`);
         await this.runScript(script);
-        this.output.ok(`          script "${script}" successfully proceeded.`);
+        this.output.ok(`    script "${script}" successfully proceeded.`);
 
         if(scripts.length > 0) {
             return this.runPrerequisites(scripts)

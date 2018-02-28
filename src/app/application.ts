@@ -103,7 +103,7 @@ export class Application {
 
     private async assertBranchMeetsAllPrerequisites() {
         const allPrerequisites = new BranchMeetsAllPrerequisites(
-            this.output, this.config.prerequisites, this.input, new ChildProcessExecutor()
+            this.output, this.config.prerequisites, this.input, new ChildProcessExecutor(), this.getStepsCount()
         );
         await allPrerequisites.execute();
     }
