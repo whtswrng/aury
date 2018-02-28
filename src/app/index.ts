@@ -23,12 +23,21 @@ let git: Git;
 let input: IInput;
 let statusStorage: StatusStorage;
 let reviewStorage: ReviewStorage;
+let config: IConfig
 
-initDependencies();
-initStorageDirectory();
+
 start();
 
-function initDependencies() {
+async function start() {
+    try {
+        initDependencies();
+        await initConfig();
+        initStorageDirectory();
+        startJourney();
+    } catch (e) {}
+}
+
+async function initDependencies() {
     git = new Git(new ChildProcessExecutor());
     const stringColorizer: IStringColorizer = new StringColorizer();
     output = new Console(stringColorizer);
@@ -37,23 +46,36 @@ function initDependencies() {
     reviewStorage = new ReviewStorage(STORAGE_DIR);
 }
 
+async function initConfig() {
+    try {
+        config = await getConfig();
+    } catch (e) {
+        output.log('Cannot find configuration file `aury.config.json`.');
+        throw e;
+    }
+}
+
 function initStorageDirectory() {
     if( ! existsSync(STORAGE_DIR)) {
         mkdirSync(STORAGE_DIR);
     }
 }
 
-async function start() {
-    if(hasDefinedBranches()) {
+async function startJourney() {
+    if(hasBranchesInArguments()) {
         await startAuryApplication();
     } else {
-        if(process.argv[2] === 'status') {
-            await printStatus();
-        } else if (process.argv[2] === 'reviews') {
-            await printReviews();
-        } else {
-            output.log('You have to insert branches in format `aury $BRANCH $BASE_BRANCH` or insert command.');
-        }
+        await processCommands();
+    }
+}
+
+async function processCommands() {
+    if (process.argv[2] === 'status') {
+        await printStatus();
+    } else if (process.argv[2] === 'reviews') {
+        await printReviews();
+    } else {
+        output.log('You have to insert branches in format `aury $BRANCH $BASE_BRANCH` or insert command.');
     }
 }
 
@@ -83,7 +105,6 @@ async function printReviews() {
 
 async function startAuryApplication() {
     try {
-        const config: IConfig = await getConfig();
         const notifier = getNotifier(config);
         const application = new Application(input, output, git, config, statusStorage, reviewStorage, notifier);
 
@@ -93,7 +114,7 @@ async function startAuryApplication() {
     }
 }
 
-function hasDefinedBranches() {
+function hasBranchesInArguments() {
     return typeof process.argv[2] === 'string' && typeof process.argv[3] === 'string';
 }
 
