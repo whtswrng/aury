@@ -269,6 +269,7 @@ function startAuryApplication() {
                     return [3, 3];
                 case 2:
                     e_3 = _a.sent();
+                    console.log(e_3);
                     output.error(e_3.message);
                     return [3, 3];
                 case 3: return [2];

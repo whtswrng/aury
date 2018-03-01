@@ -238,14 +238,17 @@ var StatusStorage = (function () {
     };
     StatusStorage.prototype.findExistingCodeReviewInProgressIndex = function (branch, baseBranch) {
         return __awaiter(this, void 0, void 0, function () {
-            var parsedContent, index;
+            var status, index;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4, this.getStatus()];
                     case 1:
-                        parsedContent = _a.sent();
+                        status = _a.sent();
                         index = -1;
-                        parsedContent.inProgress.forEach(function (record, _index) {
+                        if (!status || !status.inProgress) {
+                            return [2, -1];
+                        }
+                        status.inProgress.forEach(function (record, _index) {
                             if (record.branch === branch && record.baseBranch === baseBranch) {
                                 index = _index;
                             }
@@ -257,14 +260,17 @@ var StatusStorage = (function () {
     };
     StatusStorage.prototype.findExistingCodeReviewPendingIndex = function (branch, baseBranch) {
         return __awaiter(this, void 0, void 0, function () {
-            var parsedContent, index;
+            var status, index;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4, this.getStatus()];
                     case 1:
-                        parsedContent = _a.sent();
+                        status = _a.sent();
                         index = -1;
-                        parsedContent.pending.forEach(function (record, _index) {
+                        if (!status || !status.pending) {
+                            return [2, -1];
+                        }
+                        status.pending.forEach(function (record, _index) {
                             if (record.branch === branch && record.baseBranch === baseBranch) {
                                 index = _index;
                             }

@@ -99,10 +99,14 @@ export class StatusStorage {
     }
 
     private async findExistingCodeReviewInProgressIndex(branch, baseBranch) {
-        const parsedContent = await this.getStatus();
+        const status = await this.getStatus();
         let index = -1;
 
-        parsedContent.inProgress.forEach((record, _index) => {
+        if( ! status || !status.inProgress) {
+            return -1;
+        }
+
+        status.inProgress.forEach((record, _index) => {
             if (record.branch === branch && record.baseBranch === baseBranch) {
                 index = _index;
             }
@@ -112,10 +116,14 @@ export class StatusStorage {
     }
 
     private async findExistingCodeReviewPendingIndex(branch, baseBranch) {
-        const parsedContent = await this.getStatus();
+        const status = await this.getStatus();
         let index = -1;
 
-        parsedContent.pending.forEach((record, _index) => {
+        if( ! status || !status.pending) {
+            return -1;
+        }
+
+        status.pending.forEach((record, _index) => {
             if (record.branch === branch && record.baseBranch === baseBranch) {
                 index = _index;
             }

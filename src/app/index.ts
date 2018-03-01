@@ -130,6 +130,7 @@ async function startAuryApplication() {
 
         await application.start();
     } catch (e) {
+        console.log(e);
         output.error(e.message);
     }
 }
