@@ -1,0 +1,13 @@
+{
+  "prerequisites": [
+    "npm run build:production",
+    "npm run test",
+    "npm run test:integration",
+    "npm run lint"
+  ],
+  "questions": [
+    "Does the code in branch implement required feature or solved the problem?",
+    "Does the code in branch have tests and testing the problem correctly?",
+    "Does the code in branch have clean design and code?"
+  ]
+}
