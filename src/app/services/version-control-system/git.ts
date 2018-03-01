@@ -51,7 +51,6 @@ export class Git {
     async hardResetWithOrigin(branch) {
         try {
             await this.commandExecutor.exec(`git reset --hard origin/${branch}`);
-            throw new Error('fofofofofofofo');
         } catch (e) {
             throw new Error(`branch "${branch}" cannot be reset --hard with origin.`);
         }

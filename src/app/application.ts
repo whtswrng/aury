@@ -16,11 +16,19 @@ export class Application {
 
     constructor(private input: IInput, private output: IOutput, private git: Git, private config: IConfig,
                 private statusStorage: StatusStorage, private reviewStorage: ReviewStorage, private notifier: INotifier) {
+    }
 
+    private handleSIGINT(currentCommitHash: string) {
+        process.on('SIGINT', async () => {
+            this.output.warning('Reseting git to previous state.');
+            await this.restoreGitToPreviousState(currentCommitHash);
+            process.exit();
+        });
     }
 
     public async start() {
         const currentCommitHash = await this.git.getCurrentCommitHash();
+        this.handleSIGINT(currentCommitHash);
         await this.notifyUserIfGitStatusIsNotClean();
 
         if(process.argv[4] === '--pre') {

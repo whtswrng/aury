@@ -60,6 +60,22 @@ var Application = (function () {
         this.reviewStorage = reviewStorage;
         this.notifier = notifier;
     }
+    Application.prototype.handleSIGINT = function (currentCommitHash) {
+        var _this = this;
+        process.on('SIGINT', function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        this.output.warning('Reseting git to previous state.');
+                        return [4, this.restoreGitToPreviousState(currentCommitHash)];
+                    case 1:
+                        _a.sent();
+                        process.exit();
+                        return [2];
+                }
+            });
+        }); });
+    };
     Application.prototype.start = function () {
         return __awaiter(this, void 0, void 0, function () {
             var currentCommitHash;
@@ -68,6 +84,7 @@ var Application = (function () {
                     case 0: return [4, this.git.getCurrentCommitHash()];
                     case 1:
                         currentCommitHash = _a.sent();
+                        this.handleSIGINT(currentCommitHash);
                         return [4, this.notifyUserIfGitStatusIsNotClean()];
                     case 2:
                         _a.sent();

@@ -142,7 +142,7 @@ var Git = (function () {
                         return [4, this.commandExecutor.exec("git reset --hard origin/" + branch)];
                     case 1:
                         _a.sent();
-                        throw new Error('fofofofofofofo');
+                        return [3, 3];
                     case 2:
                         e_6 = _a.sent();
                         throw new Error("branch \"" + branch + "\" cannot be reset --hard with origin.");
