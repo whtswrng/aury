@@ -60,7 +60,33 @@ var Application = (function () {
         this.reviewStorage = reviewStorage;
         this.notifier = notifier;
     }
-    Application.prototype.handleSIGINT = function (currentCommitHash) {
+    Application.prototype.start = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var currentCommitHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, this.git.getCurrentCommitHash()];
+                    case 1:
+                        currentCommitHash = _a.sent();
+                        this.handleForceQuit(currentCommitHash);
+                        return [4, this.notifyUserIfGitStatusIsNotClean()];
+                    case 2:
+                        _a.sent();
+                        if (!(process.argv[2] === '--pre')) return [3, 4];
+                        return [4, this.checkPrerequisites()];
+                    case 3:
+                        _a.sent();
+                        return [3, 6];
+                    case 4: return [4, this.startProcessing(currentCommitHash)];
+                    case 5:
+                        _a.sent();
+                        _a.label = 6;
+                    case 6: return [2];
+                }
+            });
+        });
+    };
+    Application.prototype.handleForceQuit = function (currentCommitHash) {
         var _this = this;
         process.on('SIGINT', function () { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -75,32 +101,6 @@ var Application = (function () {
                 }
             });
         }); });
-    };
-    Application.prototype.start = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var currentCommitHash;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4, this.git.getCurrentCommitHash()];
-                    case 1:
-                        currentCommitHash = _a.sent();
-                        this.handleSIGINT(currentCommitHash);
-                        return [4, this.notifyUserIfGitStatusIsNotClean()];
-                    case 2:
-                        _a.sent();
-                        if (!(process.argv[4] === '--pre')) return [3, 4];
-                        return [4, this.checkPrerequisites()];
-                    case 3:
-                        _a.sent();
-                        return [3, 6];
-                    case 4: return [4, this.startProcessing(currentCommitHash)];
-                    case 5:
-                        _a.sent();
-                        _a.label = 6;
-                    case 6: return [2];
-                }
-            });
-        });
     };
     Application.prototype.checkPrerequisites = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -204,7 +204,7 @@ var Application = (function () {
         return process.argv[2];
     };
     Application.prototype.getBaseBranch = function () {
-        return process.argv[3];
+        return process.argv[3] || this.config.baseBranch;
     };
     Application.prototype.getDescription = function () {
         return process.argv[4];

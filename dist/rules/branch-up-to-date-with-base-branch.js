@@ -85,19 +85,22 @@ var BranchUpToDateWithBaseBranch = (function () {
                     case 0: return [4, this.canTryHardResetWithOrigin()];
                     case 1:
                         answer = _a.sent();
-                        if (!(answer === 'yes')) return [3, 3];
-                        return [4, this.hardResetAndTryAgain()];
+                        if (!(answer === 'yes')) return [3, 4];
+                        return [4, this.hardReset()];
                     case 2:
                         _a.sent();
-                        return [3, 4];
+                        return [4, this.execute()];
                     case 3:
+                        _a.sent();
+                        return [3, 5];
+                    case 4:
                         if (answer === 'skip') {
                         }
                         else {
                             throw new Error(this.getErrorMessage());
                         }
-                        _a.label = 4;
-                    case 4: return [2];
+                        _a.label = 5;
+                    case 5: return [2];
                 }
             });
         });
@@ -115,7 +118,7 @@ var BranchUpToDateWithBaseBranch = (function () {
             });
         });
     };
-    BranchUpToDateWithBaseBranch.prototype.hardResetAndTryAgain = function () {
+    BranchUpToDateWithBaseBranch.prototype.hardReset = function () {
         return __awaiter(this, void 0, void 0, function () {
             var e_2;
             return __generator(this, function (_a) {

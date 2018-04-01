@@ -26,7 +26,8 @@ export class BranchUpToDateWithBaseBranch {
         const answer = await this.canTryHardResetWithOrigin();
 
         if (answer === 'yes') {
-            await this.hardResetAndTryAgain();
+            await this.hardReset();
+            await this.execute();
         } else if (answer === 'skip'){
             // pretend everything is ok
         } else {
@@ -48,7 +49,7 @@ export class BranchUpToDateWithBaseBranch {
         );
     }
 
-    private async hardResetAndTryAgain() {
+    private async hardReset() {
         try {
             await this.git.hardResetWithOrigin(this.branch);
             await this.git.mergeFastForward(this.baseBranch, this.branch);

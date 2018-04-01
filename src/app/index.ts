@@ -71,7 +71,7 @@ async function startJourney() {
     } else if (process.argv[2] === '--add') {
         await addPendingReview(process.argv[3], process.argv[4], process.argv[5]);
     } else if (hasBranchesInArguments()) {
-        await startAuryApplication();
+        await startApplication();
     } else {
         output.log('You have to insert branches in format `aury $BRANCH $BASE_BRANCH` or insert command.');
     }
@@ -123,7 +123,7 @@ async function printReviews() {
     }
 }
 
-async function startAuryApplication() {
+async function startApplication() {
     try {
         const notifier = getNotifier(config);
         const application = new Application(input, output, git, config, statusStorage, reviewStorage, notifier);
@@ -136,7 +136,7 @@ async function startAuryApplication() {
 }
 
 function hasBranchesInArguments() {
-    return typeof process.argv[2] === 'string' && typeof process.argv[3] === 'string';
+    return typeof process.argv[2] === 'string' && (typeof process.argv[3] === 'string' || config.baseBranch);
 }
 
 async function getConfig(): Promise<IConfig> {

@@ -12,7 +12,7 @@ export class Git {
 
             return output.length === 0;
         } catch (e) {
-            throw new Error(`Git status is not clean. ${e.message}`);
+            throw new Error(`Git status is not clean. ${e}`);
         }
     }
 
@@ -20,7 +20,7 @@ export class Git {
         try {
             return await this.commandExecutor.exec(`git rev-parse HEAD`);
         } catch (e) {
-            throw new Error(`Something went wrong while getting a commit hash. ${e.message}`);
+            throw new Error(`Something went wrong while getting a commit hash. ${e}`);
         }
     }
 

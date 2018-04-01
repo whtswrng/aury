@@ -18,24 +18,24 @@ export class Application {
                 private statusStorage: StatusStorage, private reviewStorage: ReviewStorage, private notifier: INotifier) {
     }
 
-    private handleSIGINT(currentCommitHash: string) {
+    public async start() {
+        const currentCommitHash = await this.git.getCurrentCommitHash();
+        this.handleForceQuit(currentCommitHash);
+        await this.notifyUserIfGitStatusIsNotClean();
+
+        if(process.argv[2] === '--pre') {
+            await this.checkPrerequisites();
+        } else {
+            await this.startProcessing(currentCommitHash);
+        }
+    }
+
+    private handleForceQuit(currentCommitHash: string) {
         process.on('SIGINT', async () => {
             this.output.warning('Reseting git to previous state.');
             await this.restoreGitToPreviousState(currentCommitHash);
             process.exit();
         });
-    }
-
-    public async start() {
-        const currentCommitHash = await this.git.getCurrentCommitHash();
-        this.handleSIGINT(currentCommitHash);
-        await this.notifyUserIfGitStatusIsNotClean();
-
-        if(process.argv[4] === '--pre') {
-            await this.checkPrerequisites();
-        } else {
-            await this.startProcessing(currentCommitHash);
-        }
     }
 
     private async checkPrerequisites() {
@@ -79,7 +79,7 @@ export class Application {
     }
 
     private getBaseBranch(): string {
-        return process.argv[3];
+        return process.argv[3] || this.config.baseBranch;
     }
 
     private getDescription(): string {

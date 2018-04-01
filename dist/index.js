@@ -143,7 +143,7 @@ function startJourney() {
                     return [3, 11];
                 case 8:
                     if (!hasBranchesInArguments()) return [3, 10];
-                    return [4, startAuryApplication()];
+                    return [4, startApplication()];
                 case 9:
                     _a.sent();
                     return [3, 11];
@@ -254,7 +254,7 @@ function printReviews() {
         });
     });
 }
-function startAuryApplication() {
+function startApplication() {
     return __awaiter(this, void 0, void 0, function () {
         var notifier, application, e_3;
         return __generator(this, function (_a) {
@@ -278,7 +278,7 @@ function startAuryApplication() {
     });
 }
 function hasBranchesInArguments() {
-    return typeof process.argv[2] === 'string' && typeof process.argv[3] === 'string';
+    return typeof process.argv[2] === 'string' && (typeof process.argv[3] === 'string' || config.baseBranch);
 }
 function getConfig() {
     return __awaiter(this, void 0, void 0, function () {

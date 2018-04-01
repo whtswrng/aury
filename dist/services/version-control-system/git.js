@@ -52,7 +52,7 @@ var Git = (function () {
                         return [2, output.length === 0];
                     case 2:
                         e_1 = _a.sent();
-                        throw new Error("Git status is not clean. " + e_1.message);
+                        throw new Error("Git status is not clean. " + e_1);
                     case 3: return [2];
                 }
             });
@@ -69,7 +69,7 @@ var Git = (function () {
                     case 1: return [2, _a.sent()];
                     case 2:
                         e_2 = _a.sent();
-                        throw new Error("Something went wrong while getting a commit hash. " + e_2.message);
+                        throw new Error("Something went wrong while getting a commit hash. " + e_2);
                     case 3: return [2];
                 }
             });
