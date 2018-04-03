@@ -48,6 +48,7 @@ var status_storage_1 = require("./services/storage/status-storage");
 var review_storage_1 = require("./services/storage/review-storage");
 var dummy_notifier_1 = require("./services/notifiers/dummy-notifier");
 var inquirer = require("inquirer");
+var inquirer_question_parser_1 = require("./services/question-parser/inquirer-question-parser");
 var CONFIG_FILE_NAME = 'aury.config.json';
 var STORAGE_DIR = '.aury';
 var output;
@@ -55,6 +56,7 @@ var git;
 var input;
 var statusStorage;
 var reviewStorage;
+var questionParser;
 var config;
 (function () {
     return __awaiter(this, void 0, void 0, function () {
@@ -99,6 +101,7 @@ function initDependencies() {
     var stringColorizer = new string_colorizer_1.StringColorizer();
     output = new console_1.Console(stringColorizer);
     input = new console_1.Console(stringColorizer);
+    questionParser = new inquirer_question_parser_1.InquirerQuestionParser(inquirer);
     statusStorage = new status_storage_1.StatusStorage(STORAGE_DIR);
     reviewStorage = new review_storage_1.ReviewStorage(STORAGE_DIR);
 }
@@ -276,7 +279,7 @@ function startApplication() {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     notifier = getNotifier(config);
-                    application = new application_1.Application(input, output, git, config, statusStorage, reviewStorage, notifier);
+                    application = new application_1.Application(input, output, git, config, statusStorage, reviewStorage, notifier, questionParser);
                     return [4, application.start()];
                 case 1:
                     _a.sent();
@@ -312,7 +315,7 @@ function parseConfigFile(rawFileData) {
 }
 function getNotifier(config) {
     if (config && config.tokens && config.tokens.slack) {
-        return new slack_notifier_1.SlackNotifier(config.tokens.slack, input, new http_requester_1.HttpRequester());
+        return new slack_notifier_1.SlackNotifier(config.tokens.slack, input, new http_requester_1.SimpleHttpClient());
     }
     return new dummy_notifier_1.DummyNotifier();
 }

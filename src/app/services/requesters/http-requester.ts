@@ -1,9 +1,9 @@
-import {IHttpRequester} from "./http-requester.interface";
+import {HttpClient} from "./http-requester.interface";
 import * as http from "request-promise-native";
 
-export class HttpRequester implements IHttpRequester{
+export class SimpleHttpClient implements HttpClient{
 
-    public post(url, payload: object) {
+    public post(url: string, payload: Object): Promise<any> {
         const options = {
             method: 'POST',
             uri: url,
@@ -14,7 +14,7 @@ export class HttpRequester implements IHttpRequester{
             json: true
         };
 
-        return http.post(options);
+        return http.post(options) as any;
     }
 
 }

@@ -8,13 +8,12 @@ export class BranchMeetsAllPrerequisites {
     constructor(private output: IOutput,
                 private prerequisites: prerequisites,
                 private input: IInput,
-                private commandExecutor: ICommandExecutor,
-                private stepsCount: number) {
+                private commandExecutor: ICommandExecutor) {
     }
 
     async execute() {
         try {
-            this.output.info(`2/${this.stepsCount} Are all prerequisites passing?`);
+            this.output.info(`Are all prerequisites passing?`);
             await this.runPrerequisites(this.prerequisites);
             this.output.ok('Branch successfully meets all prerequisites.');
         } catch (e) {

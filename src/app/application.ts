@@ -9,13 +9,16 @@ import {INotifier} from "./services/notifiers/notifier.interface";
 import {Question} from "./rules/question";
 import {StatusStorage} from "./services/storage/status-storage";
 import {ReviewStorage} from "./services/storage/review-storage";
+import {ListQuestion, InquirerQuestionParser} from "./services/question-parser/inquirer-question-parser";
+import {QuestionParser} from "./services/question-parser/question-parser";
 
 const MAX_STEPS_WITHOUT_QUESTIONS = 2;
 
 export class Application {
 
     constructor(private input: IInput, private output: IOutput, private git: Git, private config: IConfig,
-                private statusStorage: StatusStorage, private reviewStorage: ReviewStorage, private notifier: INotifier) {
+                private statusStorage: StatusStorage, private reviewStorage: ReviewStorage, private notifier: INotifier,
+                private questionParser: QuestionParser) {
     }
 
     public async start() {
@@ -100,20 +103,12 @@ export class Application {
 
     private async assertBranchIsMergeableWithBaseBranch() {
         const branchUpToDateWithMaster = new BranchUpToDateWithBaseBranch(
-            this.getBranch(), this.getBaseBranch(), this.output, this.input, this.git, this.getStepsCount()
+            this.getBranch(), this.getBaseBranch(), this.output, this.input, this.git
         );
         await branchUpToDateWithMaster.execute();
     }
 
-    private getStepsCount(): number {
-        if(this.config && this.config.questions) {
-            return this.config.questions.length + MAX_STEPS_WITHOUT_QUESTIONS;
-        }
-
-        return MAX_STEPS_WITHOUT_QUESTIONS;
-    }
-
-    private getQuestions(): Array<string> {
+    private getQuestions(): Array<string> | ListQuestion {
         if(this.config && this.config.questions) {
             return this.config.questions;
         }
@@ -131,29 +126,14 @@ export class Application {
 
     private async assertBranchMeetsAllPrerequisites() {
         const allPrerequisites = new BranchMeetsAllPrerequisites(
-            this.output, this.getPrerequisites(), this.input, new ChildProcessExecutor(), this.getStepsCount()
+            this.output, this.getPrerequisites(), this.input, new ChildProcessExecutor()
         );
         await allPrerequisites.execute();
     }
 
     private async assertBranchMeetsAllQuestions() {
         const questions = this.getQuestions();
-
-        for(let i = 0; i < questions.length; i++) {
-            await this.assertBranchMeetsQuestion(i, questions);
-        }
-    }
-
-    private async assertBranchMeetsQuestion(i: number, questions: Array<string>) {
-        const askAndAnswer = new Question(
-            this.input, this.buildQuestionSentence(i, questions.length + 2)
-        );
-        await askAndAnswer.ask();
-        this.output.ok(`Answer on "${questions[i]}" was yes`);
-    }
-
-    private buildQuestionSentence(questionIndex: number, max: number): string {
-        return `${questionIndex + 3}/${max}) ${this.config.questions[questionIndex]} (yes/no/skip)`;
+        await this.questionParser.process(questions);
     }
 
     private async denyPullRequest(currentCommitHash: string, e) {

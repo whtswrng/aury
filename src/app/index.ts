@@ -10,12 +10,14 @@ import {IStringColorizer} from "./services/string-colorizer/string-colorizer.int
 import {Console} from "./services/input-output/console";
 import {ChildProcessExecutor} from "./services/command-executor/child-process-executor";
 import {SlackNotifier} from "./services/notifiers/slack-notifier";
-import {HttpRequester} from "./services/requesters/http-requester";
+import {SimpleHttpClient} from "./services/requesters/http-requester";
 import {INotifier} from "./services/notifiers/notifier.interface";
 import {readFilePromisified, StatusStorage} from "./services/storage/status-storage";
 import {ReviewStorage} from "./services/storage/review-storage";
 import {DummyNotifier} from "./services/notifiers/dummy-notifier";
 import * as inquirer from 'inquirer';
+import {QuestionParser} from "./services/question-parser/question-parser";
+import {InquirerQuestionParser} from "./services/question-parser/inquirer-question-parser";
 
 const CONFIG_FILE_NAME = 'aury.config.json';
 const STORAGE_DIR = '.aury';
@@ -25,6 +27,7 @@ let git: Git;
 let input: IInput;
 let statusStorage: StatusStorage;
 let reviewStorage: ReviewStorage;
+let questionParser: QuestionParser;
 let config: IConfig;
 
 
@@ -50,6 +53,7 @@ function initDependencies() {
     const stringColorizer: IStringColorizer = new StringColorizer();
     output = new Console(stringColorizer);
     input = new Console(stringColorizer);
+    questionParser = new InquirerQuestionParser(inquirer);
     statusStorage = new StatusStorage(STORAGE_DIR);
     reviewStorage = new ReviewStorage(STORAGE_DIR);
 }
@@ -134,7 +138,9 @@ async function printReviews() {
 async function startApplication() {
     try {
         const notifier = getNotifier(config);
-        const application = new Application(input, output, git, config, statusStorage, reviewStorage, notifier);
+        const application = new Application(
+            input, output, git, config, statusStorage, reviewStorage, notifier, questionParser
+        );
 
         await application.start();
     } catch (e) {
@@ -158,7 +164,7 @@ function parseConfigFile(rawFileData: string): IConfig {
 
 function getNotifier(config: IConfig): INotifier {
     if (config && config.tokens && config.tokens.slack) {
-        return new SlackNotifier(config.tokens.slack, input, new HttpRequester());
+        return new SlackNotifier(config.tokens.slack, input, new SimpleHttpClient());
     }
 
     return new DummyNotifier();

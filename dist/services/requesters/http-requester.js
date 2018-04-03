@@ -1,10 +1,10 @@
 "use strict";
 exports.__esModule = true;
 var http = require("request-promise-native");
-var HttpRequester = (function () {
-    function HttpRequester() {
+var SimpleHttpClient = (function () {
+    function SimpleHttpClient() {
     }
-    HttpRequester.prototype.post = function (url, payload) {
+    SimpleHttpClient.prototype.post = function (url, payload) {
         var options = {
             method: 'POST',
             uri: url,
@@ -16,7 +16,7 @@ var HttpRequester = (function () {
         };
         return http.post(options);
     };
-    return HttpRequester;
+    return SimpleHttpClient;
 }());
-exports.HttpRequester = HttpRequester;
+exports.SimpleHttpClient = SimpleHttpClient;
 //# sourceMappingURL=http-requester.js.map

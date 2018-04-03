@@ -3,27 +3,27 @@ import * as sinon from 'sinon';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import {IncorrectFormatError, ListQuestion, QuestionParser} from "./question-parser";
+import {IncorrectFormatError, ListQuestion, InquirerQuestionParser} from "./inquirer-question-parser";
 import {expect} from 'chai';
 import {SinonStub} from "sinon";
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
-describe('QuestionParser', () => {
+describe('InquirerQuestionParser', () => {
 
-    let questionParser: QuestionParser;
+    let questionParser: InquirerQuestionParser;
     let inquirerMock;
 
     beforeEach((() => {
         inquirerMock = {
             prompt: sinon.stub().resolves() as SinonStub
         };
-        questionParser = new QuestionParser(inquirerMock);
+        questionParser = new InquirerQuestionParser(inquirerMock);
     }));
 
     it('should be properly created', () => {
-        expect(questionParser).to.be.instanceof(QuestionParser);
+        expect(questionParser).to.be.instanceof(InquirerQuestionParser);
     });
 
     it('should have process method', () => {

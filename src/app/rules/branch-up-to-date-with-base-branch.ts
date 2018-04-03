@@ -4,11 +4,11 @@ import {IInput} from "../services/input-output/input.interface";
 export class BranchUpToDateWithBaseBranch {
 
     constructor(private branch: string, private baseBranch: string, private printer, private input: IInput,
-                private git: Git, private stepsCount: number) {
+                private git: Git) {
     }
 
     public async execute() {
-        this.printer.info(`1/${this.stepsCount} Can be branch ${this.branch} properly merged with ${this.baseBranch} (without conflicts)`);
+        this.printer.info(`Can be branch ${this.branch} properly merged with ${this.baseBranch} (without conflicts)`);
 
         try {
             await this.git.fetch();

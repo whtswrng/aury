@@ -1,5 +1,5 @@
 import {INotifier} from "./notifier.interface";
-import {IHttpRequester} from "../requesters/http-requester.interface";
+import {HttpClient} from "../requesters/http-requester.interface";
 import {IInput} from "../input-output/input.interface";
 
 const SLACK_POST_MESSAGE_URL = 'https://slack.com/api/chat.postMessage';
@@ -8,7 +8,7 @@ export class SlackNotifier implements INotifier {
 
     private pullRequestAuthor: string;
 
-    constructor(private token: string, private input: IInput, private requester: IHttpRequester) {
+    constructor(private token: string, private input: IInput, private requester: HttpClient) {
 
     }
 

@@ -36,12 +36,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var BranchMeetsAllPrerequisites = (function () {
-    function BranchMeetsAllPrerequisites(output, prerequisites, input, commandExecutor, stepsCount) {
+    function BranchMeetsAllPrerequisites(output, prerequisites, input, commandExecutor) {
         this.output = output;
         this.prerequisites = prerequisites;
         this.input = input;
         this.commandExecutor = commandExecutor;
-        this.stepsCount = stepsCount;
     }
     BranchMeetsAllPrerequisites.prototype.execute = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -50,7 +49,7 @@ var BranchMeetsAllPrerequisites = (function () {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
-                        this.output.info("2/" + this.stepsCount + " Are all prerequisites passing?");
+                        this.output.info("Are all prerequisites passing?");
                         return [4, this.runPrerequisites(this.prerequisites)];
                     case 1:
                         _a.sent();

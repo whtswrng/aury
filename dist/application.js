@@ -48,10 +48,9 @@ exports.__esModule = true;
 var branch_up_to_date_with_base_branch_1 = require("./rules/branch-up-to-date-with-base-branch");
 var branch_meets_all_prerequisites_1 = require("./rules/branch-meets-all-prerequisites");
 var child_process_executor_1 = require("./services/command-executor/child-process-executor");
-var question_1 = require("./rules/question");
 var MAX_STEPS_WITHOUT_QUESTIONS = 2;
 var Application = (function () {
-    function Application(input, output, git, config, statusStorage, reviewStorage, notifier) {
+    function Application(input, output, git, config, statusStorage, reviewStorage, notifier, questionParser) {
         this.input = input;
         this.output = output;
         this.git = git;
@@ -59,6 +58,7 @@ var Application = (function () {
         this.statusStorage = statusStorage;
         this.reviewStorage = reviewStorage;
         this.notifier = notifier;
+        this.questionParser = questionParser;
     }
     Application.prototype.start = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -247,7 +247,7 @@ var Application = (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        branchUpToDateWithMaster = new branch_up_to_date_with_base_branch_1.BranchUpToDateWithBaseBranch(this.getBranch(), this.getBaseBranch(), this.output, this.input, this.git, this.getStepsCount());
+                        branchUpToDateWithMaster = new branch_up_to_date_with_base_branch_1.BranchUpToDateWithBaseBranch(this.getBranch(), this.getBaseBranch(), this.output, this.input, this.git);
                         return [4, branchUpToDateWithMaster.execute()];
                     case 1:
                         _a.sent();
@@ -255,12 +255,6 @@ var Application = (function () {
                 }
             });
         });
-    };
-    Application.prototype.getStepsCount = function () {
-        if (this.config && this.config.questions) {
-            return this.config.questions.length + MAX_STEPS_WITHOUT_QUESTIONS;
-        }
-        return MAX_STEPS_WITHOUT_QUESTIONS;
     };
     Application.prototype.getQuestions = function () {
         if (this.config && this.config.questions) {
@@ -280,7 +274,7 @@ var Application = (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        allPrerequisites = new branch_meets_all_prerequisites_1.BranchMeetsAllPrerequisites(this.output, this.getPrerequisites(), this.input, new child_process_executor_1.ChildProcessExecutor(), this.getStepsCount());
+                        allPrerequisites = new branch_meets_all_prerequisites_1.BranchMeetsAllPrerequisites(this.output, this.getPrerequisites(), this.input, new child_process_executor_1.ChildProcessExecutor());
                         return [4, allPrerequisites.execute()];
                     case 1:
                         _a.sent();
@@ -291,45 +285,18 @@ var Application = (function () {
     };
     Application.prototype.assertBranchMeetsAllQuestions = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var questions, i;
+            var questions;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         questions = this.getQuestions();
-                        i = 0;
-                        _a.label = 1;
-                    case 1:
-                        if (!(i < questions.length)) return [3, 4];
-                        return [4, this.assertBranchMeetsQuestion(i, questions)];
-                    case 2:
-                        _a.sent();
-                        _a.label = 3;
-                    case 3:
-                        i++;
-                        return [3, 1];
-                    case 4: return [2];
-                }
-            });
-        });
-    };
-    Application.prototype.assertBranchMeetsQuestion = function (i, questions) {
-        return __awaiter(this, void 0, void 0, function () {
-            var askAndAnswer;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        askAndAnswer = new question_1.Question(this.input, this.buildQuestionSentence(i, questions.length + 2));
-                        return [4, askAndAnswer.ask()];
+                        return [4, this.questionParser.process(questions)];
                     case 1:
                         _a.sent();
-                        this.output.ok("Answer on \"" + questions[i] + "\" was yes");
                         return [2];
                 }
             });
         });
-    };
-    Application.prototype.buildQuestionSentence = function (questionIndex, max) {
-        return questionIndex + 3 + "/" + max + ") " + this.config.questions[questionIndex] + " (yes/no/skip)";
     };
     Application.prototype.denyPullRequest = function (currentCommitHash, e) {
         return __awaiter(this, void 0, void 0, function () {

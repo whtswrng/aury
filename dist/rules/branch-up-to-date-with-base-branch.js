@@ -36,13 +36,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var BranchUpToDateWithBaseBranch = (function () {
-    function BranchUpToDateWithBaseBranch(branch, baseBranch, printer, input, git, stepsCount) {
+    function BranchUpToDateWithBaseBranch(branch, baseBranch, printer, input, git) {
         this.branch = branch;
         this.baseBranch = baseBranch;
         this.printer = printer;
         this.input = input;
         this.git = git;
-        this.stepsCount = stepsCount;
     }
     BranchUpToDateWithBaseBranch.prototype.execute = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -50,7 +49,7 @@ var BranchUpToDateWithBaseBranch = (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        this.printer.info("1/" + this.stepsCount + " Can be branch " + this.branch + " properly merged with " + this.baseBranch + " (without conflicts)");
+                        this.printer.info("Can be branch " + this.branch + " properly merged with " + this.baseBranch + " (without conflicts)");
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 5, , 7]);

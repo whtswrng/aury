@@ -1,6 +1,8 @@
+import {ListQuestion} from "./services/question-parser/inquirer-question-parser";
+
 export interface IConfig {
     prerequisites: prerequisites;
-    questions: Array<string>;
+    questions: Array<string> | ListQuestion;
     baseBranch: string;
     tokens: {
         slack: string;
