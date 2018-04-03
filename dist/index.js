@@ -47,6 +47,7 @@ var http_requester_1 = require("./services/requesters/http-requester");
 var status_storage_1 = require("./services/storage/status-storage");
 var review_storage_1 = require("./services/storage/review-storage");
 var dummy_notifier_1 = require("./services/notifiers/dummy-notifier");
+var inquirer = require("inquirer");
 var CONFIG_FILE_NAME = 'aury.config.json';
 var STORAGE_DIR = '.aury';
 var output;
@@ -55,7 +56,20 @@ var input;
 var statusStorage;
 var reviewStorage;
 var config;
-start();
+(function () {
+    return __awaiter(this, void 0, void 0, function () {
+        var answer;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4, inquirer.prompt([{ type: 'list', message: 'Hello', name: 'blub', choices: ['A', 'B', 'C'] }])];
+                case 1:
+                    answer = _a.sent();
+                    console.log(answer);
+                    return [2];
+            }
+        });
+    });
+})();
 function start() {
     return __awaiter(this, void 0, void 0, function () {
         var e_1;

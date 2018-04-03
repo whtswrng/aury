@@ -1,4 +1,5 @@
 import {IInput} from "../services/input-output/input.interface";
+import * as console from 'inquirer';
 
 export class Question {
 

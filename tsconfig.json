@@ -5,14 +5,14 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
-    "lib": ["ES2015"]
+    "lib": ["es2015"]
   },
   "include": [
     "src/**/*"
   ],
   "exclude": [
     "node_modules",
-    "@types/**",
+    "@types",
     "**/*.spec.ts"
   ]
 }

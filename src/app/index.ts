@@ -15,6 +15,7 @@ import {INotifier} from "./services/notifiers/notifier.interface";
 import {readFilePromisified, StatusStorage} from "./services/storage/status-storage";
 import {ReviewStorage} from "./services/storage/review-storage";
 import {DummyNotifier} from "./services/notifiers/dummy-notifier";
+import * as inquirer from 'inquirer';
 
 const CONFIG_FILE_NAME = 'aury.config.json';
 const STORAGE_DIR = '.aury';
@@ -26,7 +27,14 @@ let statusStorage: StatusStorage;
 let reviewStorage: ReviewStorage;
 let config: IConfig;
 
-start();
+
+(async function() {
+    const answer = await inquirer.prompt([{type: 'list', message: 'Hello', name: 'blub', choices: ['A', 'B', 'C']}]);
+    console.log(answer);
+
+})();
+
+// start();
 
 async function start() {
     try {
