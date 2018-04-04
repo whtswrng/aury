@@ -10,7 +10,6 @@ import {IStringColorizer} from "./services/string-colorizer/string-colorizer.int
 import {Console} from "./services/input-output/console";
 import {ChildProcessExecutor} from "./services/command-executor/child-process-executor";
 import {SlackNotifier} from "./services/notifiers/slack-notifier";
-import {SimpleHttpClient} from "./services/requesters/http-requester";
 import {INotifier} from "./services/notifiers/notifier.interface";
 import {readFilePromisified, StatusStorage} from "./services/storage/status-storage";
 import {ReviewStorage} from "./services/storage/review-storage";
@@ -18,10 +17,15 @@ import {DummyNotifier} from "./services/notifiers/dummy-notifier";
 import * as inquirer from 'inquirer';
 import {QuestionParser} from "./services/question-parser/question-parser";
 import {InquirerQuestionParser} from "./services/question-parser/inquirer-question-parser";
+import {SimpleHttpClient} from "./services/clients/simple-http-client";
+import {InquirerInput} from "./services/input-output/inquirer-input";
+import {FinalActionHook, FinalStageHook} from "./core/final-stage-hook";
+import {DummyFinalStageHook} from "./core/dummy-final-stage-hook";
 
 const CONFIG_FILE_NAME = 'aury.config.json';
 const STORAGE_DIR = '.aury';
 
+let finalStage: FinalActionHook;
 let output: IOutput;
 let git: Git;
 let input: IInput;
@@ -29,33 +33,31 @@ let statusStorage: StatusStorage;
 let reviewStorage: ReviewStorage;
 let questionParser: QuestionParser;
 let config: IConfig;
+let notifier: INotifier;
 
 
-(async function() {
-    const answer = await inquirer.prompt([{type: 'list', message: 'Hello', name: 'blub', choices: ['A', 'B', 'C']}]);
-    console.log(answer);
-
-})();
-
-// start();
+start();
 
 async function start() {
     try {
-        initDependencies();
         await initConfig();
+        await initDependencies();
         initStorageDirectory();
         await startJourney();
-    } catch (e) {}
+    } catch (e) {
+    }
 }
 
-function initDependencies() {
-    git = new Git(new ChildProcessExecutor());
+async function initDependencies() {
     const stringColorizer: IStringColorizer = new StringColorizer();
+    notifier = instantiateNotifier(config);
+    git = new Git(new ChildProcessExecutor());
     output = new Console(stringColorizer);
-    input = new Console(stringColorizer);
+    input = new InquirerInput(inquirer, stringColorizer);
     questionParser = new InquirerQuestionParser(inquirer);
     statusStorage = new StatusStorage(STORAGE_DIR);
     reviewStorage = new ReviewStorage(STORAGE_DIR);
+    finalStage = instantiateFinalStageHook();
 }
 
 async function initConfig() {
@@ -68,7 +70,7 @@ async function initConfig() {
 }
 
 function initStorageDirectory() {
-    if( ! existsSync(STORAGE_DIR)) {
+    if (!existsSync(STORAGE_DIR)) {
         mkdirSync(STORAGE_DIR);
     }
 }
@@ -106,7 +108,7 @@ async function printStatus() {
 async function printReviewsInProgress() {
     const status = await statusStorage.getStatus();
 
-    if(status && status.inProgress && status.inProgress.length) {
+    if (status && status.inProgress && status.inProgress.length) {
         output.log('Some code reviews are in progress:');
         const printableResult = status.inProgress.map((record) => `     ${record.branch} => ${record.baseBranch} (${record.description})`);
         printableResult.forEach((result) => output.warning(result));
@@ -116,7 +118,7 @@ async function printReviewsInProgress() {
 async function printReviewsInPending() {
     const status = await statusStorage.getStatus();
 
-    if(status && status.pending && status.pending.length) {
+    if (status && status.pending && status.pending.length) {
         output.log('Some code reviews are still pending:');
         const printableResult = status.pending.map((record) => `     (pending) ${record.branch} => ${record.baseBranch} (${record.description})`);
         printableResult.forEach((result) => output.log(result));
@@ -126,7 +128,7 @@ async function printReviewsInPending() {
 async function printReviews() {
     const reviews = await reviewStorage.getMonthReviews();
 
-    if(! reviews || ! reviews.length) {
+    if (!reviews || !reviews.length) {
         output.log('There are no finished code reviews for this month.');
     } else {
         output.log(`There are ${reviews.length} finished code reviews for this month: `);
@@ -137,14 +139,12 @@ async function printReviews() {
 
 async function startApplication() {
     try {
-        const notifier = getNotifier(config);
         const application = new Application(
-            input, output, git, config, statusStorage, reviewStorage, notifier, questionParser
+            input, output, git, config, statusStorage, reviewStorage, notifier, questionParser, finalStage
         );
 
         await application.start();
     } catch (e) {
-        console.log(e);
         output.error(e.message);
     }
 }
@@ -162,10 +162,18 @@ function parseConfigFile(rawFileData: string): IConfig {
     return JSON.parse(rawFileData);
 }
 
-function getNotifier(config: IConfig): INotifier {
+function instantiateNotifier(config: IConfig): INotifier {
     if (config && config.tokens && config.tokens.slack) {
         return new SlackNotifier(config.tokens.slack, input, new SimpleHttpClient());
     }
 
     return new DummyNotifier();
+}
+
+function instantiateFinalStageHook(): FinalActionHook {
+    if (notifier instanceof DummyNotifier) {
+        return new DummyFinalStageHook();
+    }
+
+    return new FinalStageHook(input, output, notifier);
 }

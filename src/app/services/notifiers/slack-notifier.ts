@@ -1,30 +1,42 @@
 import {INotifier} from "./notifier.interface";
-import {HttpClient} from "../requesters/http-requester.interface";
 import {IInput} from "../input-output/input.interface";
+import {HttpClient} from "../clients/simple-http-client.interface";
 
 const SLACK_POST_MESSAGE_URL = 'https://slack.com/api/chat.postMessage';
 
 export class SlackNotifier implements INotifier {
 
     private pullRequestAuthor: string;
+    private branch: string;
 
     constructor(private token: string, private input: IInput, private requester: HttpClient) {
 
     }
 
-    public async notifyAuthorAboutApprovedPullRequest(branch: string): Promise<void> {
-        const message = `Pull request on ${branch} was approved.`;
-        await this.notifySuccess(this.pullRequestAuthor, message);
-    }
-
-    public async notifyAuthorAboutStartingReview(branch): Promise<void> {
+    public async notifyAuthorAboutReviewedPullRequest(): Promise<void> {
         await this.notifyInfo(
             this.pullRequestAuthor,
-            `Just letting you know that someone is working on your pull request on branch ${branch}.`
+            `Someone finished review of your pull request on branch ${this.branch}.`
         );
     }
 
-    public async notifyAuthorAboutDeniedPullRequest(branch: string, message: string): Promise<void> {
+    public setBranch(branch: string): void {
+        this.branch = branch;
+    }
+
+    public async notifyAuthorAboutApprovedPullRequest(): Promise<void> {
+        const message = `Pull request on ${this.branch} was approved.`;
+        await this.notifySuccess(this.pullRequestAuthor, message);
+    }
+
+    public async notifyAuthorAboutStartingReview(): Promise<void> {
+        await this.notifyInfo(
+            this.pullRequestAuthor,
+            `Just letting you know that someone is working on your pull request on branch ${this.branch}.`
+        );
+    }
+
+    public async notifyAuthorAboutDeniedPullRequest(message: string): Promise<void> {
         const additionalMessage = await this.input.askUser(
             "(Slack) Send message about denial to the author? (yes = enter, no = CTRL+C). Additional message to the author:"
         );

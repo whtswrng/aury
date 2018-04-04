@@ -17,7 +17,7 @@ describe('InquirerQuestionParser', () => {
 
     beforeEach((() => {
         inquirerMock = {
-            prompt: sinon.stub().resolves() as SinonStub
+            prompt: sinon.stub().resolves({confirm: true}) as SinonStub
         };
         questionParser = new InquirerQuestionParser(inquirerMock);
     }));
@@ -51,13 +51,21 @@ describe('InquirerQuestionParser', () => {
         it('should process if given simple array with choices ', async () => {
             const questions = ['Does it have clean code?', 'Does it have clean design?'];
             const expectedPrompt = [
-                {type: 'confirm', message: questions[0], name: 0},
-                {type: 'confirm', message: questions[1], name: 1}
+                {type: 'confirm', message: questions[0], name: 'confirm'},
+                {type: 'confirm', message: questions[1], name: 'confirm'}
             ];
 
             await questionParser.process(questions);
 
-            expect(inquirerMock.prompt).to.have.been.calledWith(expectedPrompt);
+            expect(inquirerMock.prompt.callsArg(0)).to.have.been.calledWith([expectedPrompt[0]]);
+            expect(inquirerMock.prompt.callsArg(1)).to.have.been.calledWith([expectedPrompt[1]]);
+        });
+
+        it('should throw error if given simple array with choices and answer was no', async () => {
+            const questions = ['Does it have clean code?'];
+            simulateAnswer('no').onCall(0);
+
+            return expect(questionParser.process(questions)).to.be.rejectedWith(Error);
         });
 
         it('should process if given object with option list', async () => {
@@ -75,8 +83,10 @@ describe('InquirerQuestionParser', () => {
                 type: 'list', name: 'selectedItem', message: question.message, choices: ['Command', 'Query']
             });
             expect(inquirerMock.prompt.callsArg(1)).to.have.been.calledWith([
-                {type: 'confirm', message:  choices[0], name: 0 },
-                {type: 'confirm', message:  choices[1], name: 1 }
+                {type: 'confirm', message: choices[0], name: 'confirm' }
+            ]);
+            expect(inquirerMock.prompt.callsArg(2)).to.have.been.calledWith([
+                {type: 'confirm', message:  choices[1], name: 'confirm' }
             ]);
         });
 
@@ -105,8 +115,10 @@ describe('InquirerQuestionParser', () => {
                 type: 'list', name: 'selectedItem', message: 'What kind of command?', choices: ['Old']
             });
             expect(inquirerMock.prompt.callsArg(2)).to.have.been.calledWith([
-                {type: 'confirm', message: 'Is it OK?', name: 0 },
-                {type: 'confirm', message:  'Is it really old?', name: 1 }
+                {type: 'confirm', message: 'Is it OK?', name: 'confirm' }
+            ]);
+            expect(inquirerMock.prompt.callsArg(3)).to.have.been.calledWith([
+                {type: 'confirm', message:  'Is it really old?', name: 'confirm' }
             ]);
         });
 
@@ -116,6 +128,14 @@ describe('InquirerQuestionParser', () => {
         return {
             onCall: (indexCall) => {
                 inquirerMock.prompt.onCall(indexCall).resolves({selectedItem});
+            }
+        };
+    }
+
+    function simulateAnswer(answer: string) {
+        return {
+            onCall: (indexCall) => {
+                inquirerMock.prompt.onCall(indexCall).resolves({confirm: answer === 'no' ? false : true});
             }
         };
     }

@@ -9,18 +9,36 @@ export class InquirerQuestionParser implements QuestionParser{
 
     public async process(questions: Array<string> | ListQuestion): Promise<void> {
         if(Array.isArray(questions)) {
-            await this.processSimpleChoices(questions);
+            await this.processConfirmQuestions([...questions]);
         } else {
-            await this.processListChoices(questions);
+            await this.processListQuestions(questions);
         }
     }
 
-    private processSimpleChoices(questions: Array<string>) {
-        this.assertQuestionsAreValid(questions);
-        this.inquirer.prompt(this.transformConfirmQuestions(questions) as any);
+    private async processConfirmQuestions(questions: Array<string>): Promise<void> {
+        this.assertConfirmQuestionsAreValid(questions);
+
+        if(questions.length === 0 ){
+            return;
+        }
+
+        await this.askQuestions(questions);
     }
 
-    private async processListChoices(question: ListQuestion) {
+    private async askQuestions(questions: Array<string>) {
+        const question = questions.shift();
+        const answer = await this.inquirer.prompt([this.transformConfirmQuestion(question) as any]) as Answer;
+        this.assertAnswer(answer, question);
+        await this.processConfirmQuestions(questions);
+    }
+
+    private assertAnswer(answer: Answer, question: string): void {
+        if (!answer.confirm) {
+            throw new Error(`Answer on question "${question}" was no.`);
+        }
+    }
+
+    private async processListQuestions(question: ListQuestion) {
         this.assertListQuestionIsValid(question);
         const answer = await this.inquirer.prompt(this.transformListQuestion(question) as any) as Answer;
 
@@ -42,10 +60,12 @@ export class InquirerQuestionParser implements QuestionParser{
         await this.process(question.choices[nextQuestionIndex].values);
     }
 
-    private assertQuestionsAreValid(questions: Array<string> | ListQuestion): void {
-        if (typeof questions !== 'object') {
-            throw new IncorrectFormatError(`Incorrect format, object expected, ${typeof questions} given`);
-        }
+    private assertConfirmQuestionsAreValid(questions: Array<string>): void {
+        questions.forEach((question) => {
+            if(typeof question !== 'string') {
+                throw new IncorrectFormatError(`Incorrect format, object expected, ${typeof questions} given`);
+            }
+        });
     }
 
     private assertListQuestionIsValid(question: ListQuestion): void {
@@ -57,15 +77,12 @@ export class InquirerQuestionParser implements QuestionParser{
         }
     }
 
-    private transformConfirmQuestions(questions: Array<Question>): Array<InquirerConfirmQuestion> {
-        return questions.map((question: string, index) => {
-            return {
-                type: 'confirm',
-                name: index,
-                message: question
-            }
-        });
-
+    private transformConfirmQuestion(question: string): InquirerConfirmQuestion {
+        return {
+            type: 'confirm',
+            name: 'confirm',
+            message: question
+        };
     }
 
     private transformListQuestion(question: ListQuestion): InquirerListQuestion {
@@ -81,7 +98,8 @@ export class InquirerQuestionParser implements QuestionParser{
 }
 
 export interface Answer {
-    selectedItem: string;
+    selectedItem?: string;
+    confirm?: string;
 }
 
 export interface ListQuestion {

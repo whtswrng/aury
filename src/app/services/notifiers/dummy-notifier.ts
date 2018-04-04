@@ -2,16 +2,22 @@ import {INotifier} from "./notifier.interface";
 
 export class DummyNotifier implements INotifier {
 
-    notifyAuthorAboutApprovedPullRequest(branch: string): Promise<void> {
+    notifyAuthorAboutReviewedPullRequest(): Promise<void> {
+        return null;
+    }
+    setBranch(branch: string): void {
+    }
+
+    notifyAuthorAboutApprovedPullRequest(): Promise<void> {
         return null;
     }
 
-    notifyAuthorAboutDeniedPullRequest(branch: string, errorMessage: string): Promise<void> {
+    notifyAuthorAboutDeniedPullRequest(errorMessage: string): Promise<void> {
         console.log(errorMessage);
         return null;
     }
 
-    notifyAuthorAboutStartingReview(branch: string): Promise<void> {
+    notifyAuthorAboutStartingReview(): Promise<void> {
         return null;
     }
 

@@ -55,11 +55,11 @@ var InquirerQuestionParser = (function () {
                 switch (_a.label) {
                     case 0:
                         if (!Array.isArray(questions)) return [3, 2];
-                        return [4, this.processSimpleChoices(questions)];
+                        return [4, this.processConfirmQuestions(questions.slice())];
                     case 1:
                         _a.sent();
                         return [3, 4];
-                    case 2: return [4, this.processListChoices(questions)];
+                    case 2: return [4, this.processListQuestions(questions)];
                     case 3:
                         _a.sent();
                         _a.label = 4;
@@ -68,11 +68,48 @@ var InquirerQuestionParser = (function () {
             });
         });
     };
-    InquirerQuestionParser.prototype.processSimpleChoices = function (questions) {
-        this.assertQuestionsAreValid(questions);
-        this.inquirer.prompt(this.transformConfirmQuestions(questions));
+    InquirerQuestionParser.prototype.processConfirmQuestions = function (questions) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        this.assertConfirmQuestionsAreValid(questions);
+                        if (questions.length === 0) {
+                            return [2];
+                        }
+                        return [4, this.askQuestions(questions)];
+                    case 1:
+                        _a.sent();
+                        return [2];
+                }
+            });
+        });
     };
-    InquirerQuestionParser.prototype.processListChoices = function (question) {
+    InquirerQuestionParser.prototype.askQuestions = function (questions) {
+        return __awaiter(this, void 0, void 0, function () {
+            var question, answer;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        question = questions.shift();
+                        return [4, this.inquirer.prompt([this.transformConfirmQuestion(question)])];
+                    case 1:
+                        answer = _a.sent();
+                        this.assertAnswer(answer, question);
+                        return [4, this.processConfirmQuestions(questions)];
+                    case 2:
+                        _a.sent();
+                        return [2];
+                }
+            });
+        });
+    };
+    InquirerQuestionParser.prototype.assertAnswer = function (answer, question) {
+        if (!answer.confirm) {
+            throw new Error("Answer on question \"" + question + "\" was no.");
+        }
+    };
+    InquirerQuestionParser.prototype.processListQuestions = function (question) {
         return __awaiter(this, void 0, void 0, function () {
             var answer;
             return __generator(this, function (_a) {
@@ -113,10 +150,12 @@ var InquirerQuestionParser = (function () {
             });
         });
     };
-    InquirerQuestionParser.prototype.assertQuestionsAreValid = function (questions) {
-        if (typeof questions !== 'object') {
-            throw new IncorrectFormatError("Incorrect format, object expected, " + typeof questions + " given");
-        }
+    InquirerQuestionParser.prototype.assertConfirmQuestionsAreValid = function (questions) {
+        questions.forEach(function (question) {
+            if (typeof question !== 'string') {
+                throw new IncorrectFormatError("Incorrect format, object expected, " + typeof questions + " given");
+            }
+        });
     };
     InquirerQuestionParser.prototype.assertListQuestionIsValid = function (question) {
         if (typeof question !== 'object') {
@@ -126,14 +165,12 @@ var InquirerQuestionParser = (function () {
             throw new IncorrectFormatError("Incorrect format of list question!");
         }
     };
-    InquirerQuestionParser.prototype.transformConfirmQuestions = function (questions) {
-        return questions.map(function (question, index) {
-            return {
-                type: 'confirm',
-                name: index,
-                message: question
-            };
-        });
+    InquirerQuestionParser.prototype.transformConfirmQuestion = function (question) {
+        return {
+            type: 'confirm',
+            name: 'confirm',
+            message: question
+        };
     };
     InquirerQuestionParser.prototype.transformListQuestion = function (question) {
         return {

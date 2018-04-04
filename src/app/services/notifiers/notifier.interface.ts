@@ -1,6 +1,8 @@
 export interface INotifier {
+    setBranch(branch: string): void;
     askOnPullRequestAuthor(): Promise<void>
-    notifyAuthorAboutStartingReview(branch: string): Promise<void>
-    notifyAuthorAboutDeniedPullRequest(branch: string, errorMessage: string): Promise<void>
-    notifyAuthorAboutApprovedPullRequest(branch: string): Promise<void>
+    notifyAuthorAboutStartingReview(): Promise<void>
+    notifyAuthorAboutDeniedPullRequest(errorMessage: string): Promise<void>
+    notifyAuthorAboutApprovedPullRequest(): Promise<void>
+    notifyAuthorAboutReviewedPullRequest(): Promise<void>;
 }

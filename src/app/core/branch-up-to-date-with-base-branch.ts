@@ -17,7 +17,7 @@ export class BranchUpToDateWithBaseBranch {
 
             this.printer.ok(`Branch ${this.branch} can be merged with ${this.baseBranch}.`);
         } catch (e) {
-            this.printMergeError();
+            this.printMergeError(e);
             await this.handleError(e);
         }
     }
@@ -35,7 +35,7 @@ export class BranchUpToDateWithBaseBranch {
         }
     }
 
-    private printMergeError() {
+    private printMergeError(e) {
         this.printer.error(this.getErrorMessage());
     }
 
@@ -54,7 +54,7 @@ export class BranchUpToDateWithBaseBranch {
             await this.git.hardResetWithOrigin(this.branch);
             await this.git.mergeFastForward(this.baseBranch, this.branch);
         } catch (e) {
-            this.printMergeError();
+            this.printMergeError(e);
             throw new Error(this.getErrorMessage());
         }
     }

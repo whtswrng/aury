@@ -43,14 +43,18 @@ var string_colorizer_1 = require("./services/string-colorizer/string-colorizer")
 var console_1 = require("./services/input-output/console");
 var child_process_executor_1 = require("./services/command-executor/child-process-executor");
 var slack_notifier_1 = require("./services/notifiers/slack-notifier");
-var http_requester_1 = require("./services/requesters/http-requester");
 var status_storage_1 = require("./services/storage/status-storage");
 var review_storage_1 = require("./services/storage/review-storage");
 var dummy_notifier_1 = require("./services/notifiers/dummy-notifier");
 var inquirer = require("inquirer");
 var inquirer_question_parser_1 = require("./services/question-parser/inquirer-question-parser");
+var simple_http_client_1 = require("./services/clients/simple-http-client");
+var inquirer_input_1 = require("./services/input-output/inquirer-input");
+var final_stage_hook_1 = require("./core/final-stage-hook");
+var dummy_final_stage_hook_1 = require("./core/dummy-final-stage-hook");
 var CONFIG_FILE_NAME = 'aury.config.json';
 var STORAGE_DIR = '.aury';
+var finalStage;
 var output;
 var git;
 var input;
@@ -58,52 +62,50 @@ var statusStorage;
 var reviewStorage;
 var questionParser;
 var config;
-(function () {
-    return __awaiter(this, void 0, void 0, function () {
-        var answer;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4, inquirer.prompt([{ type: 'list', message: 'Hello', name: 'blub', choices: ['A', 'B', 'C'] }])];
-                case 1:
-                    answer = _a.sent();
-                    console.log(answer);
-                    return [2];
-            }
-        });
-    });
-})();
+var notifier;
+start();
 function start() {
     return __awaiter(this, void 0, void 0, function () {
         var e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
-                    initDependencies();
+                    _a.trys.push([0, 4, , 5]);
                     return [4, initConfig()];
                 case 1:
                     _a.sent();
-                    initStorageDirectory();
-                    return [4, startJourney()];
+                    return [4, initDependencies()];
                 case 2:
                     _a.sent();
-                    return [3, 4];
+                    initStorageDirectory();
+                    return [4, startJourney()];
                 case 3:
+                    _a.sent();
+                    return [3, 5];
+                case 4:
                     e_1 = _a.sent();
-                    return [3, 4];
-                case 4: return [2];
+                    return [3, 5];
+                case 5: return [2];
             }
         });
     });
 }
 function initDependencies() {
-    git = new git_1.Git(new child_process_executor_1.ChildProcessExecutor());
-    var stringColorizer = new string_colorizer_1.StringColorizer();
-    output = new console_1.Console(stringColorizer);
-    input = new console_1.Console(stringColorizer);
-    questionParser = new inquirer_question_parser_1.InquirerQuestionParser(inquirer);
-    statusStorage = new status_storage_1.StatusStorage(STORAGE_DIR);
-    reviewStorage = new review_storage_1.ReviewStorage(STORAGE_DIR);
+    return __awaiter(this, void 0, void 0, function () {
+        var stringColorizer;
+        return __generator(this, function (_a) {
+            stringColorizer = new string_colorizer_1.StringColorizer();
+            notifier = instantiateNotifier(config);
+            git = new git_1.Git(new child_process_executor_1.ChildProcessExecutor());
+            output = new console_1.Console(stringColorizer);
+            input = new inquirer_input_1.InquirerInput(inquirer, stringColorizer);
+            questionParser = new inquirer_question_parser_1.InquirerQuestionParser(inquirer);
+            statusStorage = new status_storage_1.StatusStorage(STORAGE_DIR);
+            reviewStorage = new review_storage_1.ReviewStorage(STORAGE_DIR);
+            finalStage = instantiateFinalStageHook();
+            return [2];
+        });
+    });
 }
 function initConfig() {
     return __awaiter(this, void 0, void 0, function () {
@@ -273,20 +275,18 @@ function printReviews() {
 }
 function startApplication() {
     return __awaiter(this, void 0, void 0, function () {
-        var notifier, application, e_3;
+        var application, e_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    notifier = getNotifier(config);
-                    application = new application_1.Application(input, output, git, config, statusStorage, reviewStorage, notifier, questionParser);
+                    application = new application_1.Application(input, output, git, config, statusStorage, reviewStorage, notifier, questionParser, finalStage);
                     return [4, application.start()];
                 case 1:
                     _a.sent();
                     return [3, 3];
                 case 2:
                     e_3 = _a.sent();
-                    console.log(e_3);
                     output.error(e_3.message);
                     return [3, 3];
                 case 3: return [2];
@@ -313,10 +313,16 @@ function getConfig() {
 function parseConfigFile(rawFileData) {
     return JSON.parse(rawFileData);
 }
-function getNotifier(config) {
+function instantiateNotifier(config) {
     if (config && config.tokens && config.tokens.slack) {
-        return new slack_notifier_1.SlackNotifier(config.tokens.slack, input, new http_requester_1.SimpleHttpClient());
+        return new slack_notifier_1.SlackNotifier(config.tokens.slack, input, new simple_http_client_1.SimpleHttpClient());
     }
     return new dummy_notifier_1.DummyNotifier();
+}
+function instantiateFinalStageHook() {
+    if (notifier instanceof dummy_notifier_1.DummyNotifier) {
+        return new dummy_final_stage_hook_1.DummyFinalStageHook();
+    }
+    return new final_stage_hook_1.FinalStageHook(input, output, notifier);
 }
 //# sourceMappingURL=index.js.map

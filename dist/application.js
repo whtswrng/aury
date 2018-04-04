@@ -45,12 +45,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var branch_up_to_date_with_base_branch_1 = require("./rules/branch-up-to-date-with-base-branch");
-var branch_meets_all_prerequisites_1 = require("./rules/branch-meets-all-prerequisites");
 var child_process_executor_1 = require("./services/command-executor/child-process-executor");
-var MAX_STEPS_WITHOUT_QUESTIONS = 2;
+var branch_up_to_date_with_base_branch_1 = require("./core/branch-up-to-date-with-base-branch");
+var branch_meets_all_prerequisites_1 = require("./core/branch-meets-all-prerequisites");
 var Application = (function () {
-    function Application(input, output, git, config, statusStorage, reviewStorage, notifier, questionParser) {
+    function Application(input, output, git, config, statusStorage, reviewStorage, notifier, questionParser, finalStage) {
         this.input = input;
         this.output = output;
         this.git = git;
@@ -59,19 +58,22 @@ var Application = (function () {
         this.reviewStorage = reviewStorage;
         this.notifier = notifier;
         this.questionParser = questionParser;
+        this.finalStage = finalStage;
     }
     Application.prototype.start = function () {
         return __awaiter(this, void 0, void 0, function () {
             var currentCommitHash;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4, this.git.getCurrentCommitHash()];
+                    case 0:
+                        this.notifier.setBranch(this.getBranch());
+                        return [4, this.git.getCurrentCommitHash()];
                     case 1:
                         currentCommitHash = _a.sent();
-                        this.handleForceQuit(currentCommitHash);
                         return [4, this.notifyUserIfGitStatusIsNotClean()];
                     case 2:
                         _a.sent();
+                        this.handleForceQuit(currentCommitHash);
                         if (!(process.argv[2] === '--pre')) return [3, 4];
                         return [4, this.checkPrerequisites()];
                     case 3:
@@ -92,7 +94,7 @@ var Application = (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        this.output.warning('Reseting git to previous state.');
+                        this.output.warning('\nReseting git to previous state.');
                         return [4, this.restoreGitToPreviousState(currentCommitHash)];
                     case 1:
                         _a.sent();
@@ -140,7 +142,7 @@ var Application = (function () {
                         return [4, this.restoreGitToPreviousState(currentCommitHash)];
                     case 4:
                         _a.sent();
-                        return [4, this.approvePullRequest()];
+                        return [4, this.finishReview()];
                     case 5:
                         _a.sent();
                         return [4, this.statusStorage.removeCodeReviewFromInProgress(this.getBranch(), this.getBaseBranch())];
@@ -191,7 +193,7 @@ var Application = (function () {
                         return [4, this.statusStorage.isCodeReviewInProgress(this.getBranch(), this.getBaseBranch())];
                     case 2:
                         if (!!(_a.sent())) return [3, 4];
-                        return [4, this.notifier.notifyAuthorAboutStartingReview(this.getBranch())];
+                        return [4, this.notifier.notifyAuthorAboutStartingReview()];
                     case 3:
                         _a.sent();
                         _a.label = 4;
@@ -227,14 +229,8 @@ var Application = (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4, this.assertBranchIsMergeableWithBaseBranch()];
+                    case 0: return [4, this.assertBranchMeetsAllQuestions()];
                     case 1:
-                        _a.sent();
-                        return [4, this.assertBranchMeetsAllPrerequisites()];
-                    case 2:
-                        _a.sent();
-                        return [4, this.assertBranchMeetsAllQuestions()];
-                    case 3:
                         _a.sent();
                         return [2];
                 }
@@ -303,15 +299,14 @@ var Application = (function () {
             var errorMessage;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        errorMessage = "Pull request on branch " + this.getBranch() + " was denied, because of: \"" + e.message + "\"";
-                        return [4, this.restoreGitToPreviousState(currentCommitHash)];
+                    case 0: return [4, this.finalStage.finish()];
                     case 1:
                         _a.sent();
-                        this.output.error(errorMessage);
-                        return [4, this.notifier.notifyAuthorAboutDeniedPullRequest(this.getBranch(), errorMessage)];
+                        errorMessage = "Pull request on branch " + this.getBranch() + " was denied.";
+                        return [4, this.restoreGitToPreviousState(currentCommitHash)];
                     case 2:
                         _a.sent();
+                        this.output.error(errorMessage);
                         return [2];
                 }
             });
@@ -339,17 +334,16 @@ var Application = (function () {
             });
         });
     };
-    Application.prototype.approvePullRequest = function () {
+    Application.prototype.finishReview = function () {
         return __awaiter(this, void 0, void 0, function () {
             var message;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        message = "Pull request on branch " + this.getBranch() + " was approved.";
-                        this.output.ok("\n" + message);
-                        return [4, this.notifier.notifyAuthorAboutApprovedPullRequest(this.getBranch())];
+                    case 0: return [4, this.finalStage.finish()];
                     case 1:
                         _a.sent();
+                        message = "Pull request on branch " + this.getBranch() + " was reviewed.";
+                        this.output.ok("\n" + message);
                         return [2];
                 }
             });

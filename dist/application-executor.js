@@ -119,7 +119,7 @@ var ApplicationExecutor = (function () {
                         return [4, this.restoreGitToPreviousState(currentCommitHash)];
                     case 3:
                         _a.sent();
-                        return [4, this.approvePullRequest()];
+                        return [4, this.handlePullRequestApproved()];
                     case 4:
                         _a.sent();
                         return [3, 7];

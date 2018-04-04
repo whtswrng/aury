@@ -1,30 +1,30 @@
 import {Git} from "./services/version-control-system/git";
-import {BranchUpToDateWithBaseBranch} from "./rules/branch-up-to-date-with-base-branch";
-import {BranchMeetsAllPrerequisites} from "./rules/branch-meets-all-prerequisites";
 import {IConfig} from "./config.interface";
 import {IInput} from "./services/input-output/input.interface";
 import {IOutput} from "./services/input-output/output.interface";
 import {ChildProcessExecutor} from "./services/command-executor/child-process-executor";
 import {INotifier} from "./services/notifiers/notifier.interface";
-import {Question} from "./rules/question";
 import {StatusStorage} from "./services/storage/status-storage";
 import {ReviewStorage} from "./services/storage/review-storage";
-import {ListQuestion, InquirerQuestionParser} from "./services/question-parser/inquirer-question-parser";
+import {ListQuestion} from "./services/question-parser/inquirer-question-parser";
 import {QuestionParser} from "./services/question-parser/question-parser";
-
-const MAX_STEPS_WITHOUT_QUESTIONS = 2;
+import {BranchUpToDateWithBaseBranch} from "./core/branch-up-to-date-with-base-branch";
+import {BranchMeetsAllPrerequisites} from "./core/branch-meets-all-prerequisites";
+import {FinalStageHook} from "./core/final-stage-hook";
+import {AsyncHook} from "async_hooks";
 
 export class Application {
 
     constructor(private input: IInput, private output: IOutput, private git: Git, private config: IConfig,
                 private statusStorage: StatusStorage, private reviewStorage: ReviewStorage, private notifier: INotifier,
-                private questionParser: QuestionParser) {
+                private questionParser: QuestionParser, private finalStage: AsyncHook) {
     }
 
     public async start() {
+        this.notifier.setBranch(this.getBranch());
         const currentCommitHash = await this.git.getCurrentCommitHash();
-        this.handleForceQuit(currentCommitHash);
         await this.notifyUserIfGitStatusIsNotClean();
+        this.handleForceQuit(currentCommitHash);
 
         if(process.argv[2] === '--pre') {
             await this.checkPrerequisites();
@@ -35,7 +35,7 @@ export class Application {
 
     private handleForceQuit(currentCommitHash: string) {
         process.on('SIGINT', async () => {
-            this.output.warning('Reseting git to previous state.');
+            this.output.warning('\nReseting git to previous state.');
             await this.restoreGitToPreviousState(currentCommitHash);
             process.exit();
         });
@@ -53,7 +53,7 @@ export class Application {
             await this.statusStorage.addCodeReviewToInProgress(this.getBranch(), this.getBaseBranch(), this.getDescription());
             await this.checkAllRules();
             await this.restoreGitToPreviousState(currentCommitHash);
-            await this.approvePullRequest();
+            await this.finishReview();
             await this.statusStorage.removeCodeReviewFromInProgress(this.getBranch(), this.getBaseBranch());
             await this.reviewStorage.addFinishedReview(this.getBranch(), this.getBaseBranch());
         } catch (e) {
@@ -73,7 +73,7 @@ export class Application {
         await this.notifier.askOnPullRequestAuthor();
 
         if (!await this.statusStorage.isCodeReviewInProgress(this.getBranch(), this.getBaseBranch())) {
-            await this.notifier.notifyAuthorAboutStartingReview(this.getBranch());
+            await this.notifier.notifyAuthorAboutStartingReview();
         }
     }
 
@@ -96,8 +96,8 @@ export class Application {
     }
 
     private async checkAllRules() {
-        await this.assertBranchIsMergeableWithBaseBranch();
-        await this.assertBranchMeetsAllPrerequisites();
+        // await this.assertBranchIsMergeableWithBaseBranch();
+        // await this.assertBranchMeetsAllPrerequisites();
         await this.assertBranchMeetsAllQuestions();
     }
 
@@ -137,10 +137,10 @@ export class Application {
     }
 
     private async denyPullRequest(currentCommitHash: string, e) {
-        const errorMessage = `Pull request on branch ${this.getBranch()} was denied, because of: "${e.message}"`;
+        await this.finalStage.finish();
+        const errorMessage = `Pull request on branch ${this.getBranch()} was denied.`;
         await this.restoreGitToPreviousState(currentCommitHash);
         this.output.error(errorMessage);
-        await this.notifier.notifyAuthorAboutDeniedPullRequest(this.getBranch(), errorMessage);
     }
 
     private async restoreGitToPreviousState(commit) {
@@ -152,10 +152,10 @@ export class Application {
         }
     }
 
-    private async approvePullRequest() {
-        const message = `Pull request on branch ${this.getBranch()} was approved.`;
+    private async finishReview() {
+        await this.finalStage.finish();
+        const message = `Pull request on branch ${this.getBranch()} was reviewed.`;
         this.output.ok(`\n${message}`);
-        await this.notifier.notifyAuthorAboutApprovedPullRequest(this.getBranch());
     }
 
 }

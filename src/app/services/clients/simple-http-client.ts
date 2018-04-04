@@ -1,4 +1,4 @@
-import {HttpClient} from "./http-requester.interface";
+import {HttpClient} from "./simple-http-client.interface";
 import * as http from "request-promise-native";
 
 export class SimpleHttpClient implements HttpClient{

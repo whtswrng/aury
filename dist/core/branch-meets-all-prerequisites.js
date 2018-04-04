@@ -35,112 +35,107 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var BranchUpToDateWithBaseBranch = (function () {
-    function BranchUpToDateWithBaseBranch(branch, baseBranch, printer, input, git) {
-        this.branch = branch;
-        this.baseBranch = baseBranch;
-        this.printer = printer;
+var BranchMeetsAllPrerequisites = (function () {
+    function BranchMeetsAllPrerequisites(output, prerequisites, input, commandExecutor) {
+        this.output = output;
+        this.prerequisites = prerequisites;
         this.input = input;
-        this.git = git;
+        this.commandExecutor = commandExecutor;
     }
-    BranchUpToDateWithBaseBranch.prototype.execute = function () {
+    BranchMeetsAllPrerequisites.prototype.execute = function () {
         return __awaiter(this, void 0, void 0, function () {
             var e_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        this.printer.info("Can be branch " + this.branch + " properly merged with " + this.baseBranch + " (without conflicts)");
-                        _a.label = 1;
+                        _a.trys.push([0, 2, , 3]);
+                        this.output.info("Are all prerequisites passing?");
+                        return [4, this.runPrerequisites(this.prerequisites)];
                     case 1:
-                        _a.trys.push([1, 5, , 7]);
-                        return [4, this.git.fetch()];
+                        _a.sent();
+                        this.output.ok('Branch successfully meets all prerequisites.');
+                        return [3, 3];
                     case 2:
-                        _a.sent();
-                        return [4, this.git.checkoutTo(this.branch)];
-                    case 3:
-                        _a.sent();
-                        return [4, this.git.mergeFastForward(this.baseBranch, this.branch)];
-                    case 4:
-                        _a.sent();
-                        this.printer.ok("Branch " + this.branch + " can be merged with " + this.baseBranch + ".");
-                        return [3, 7];
-                    case 5:
                         e_1 = _a.sent();
-                        this.printMergeError(e_1);
-                        return [4, this.handleError(e_1)];
-                    case 6:
-                        _a.sent();
-                        return [3, 7];
-                    case 7: return [2];
+                        this.output.error("Some prerequisite is not passing.");
+                        throw e_1;
+                    case 3: return [2];
                 }
             });
         });
     };
-    BranchUpToDateWithBaseBranch.prototype.handleError = function (e) {
+    BranchMeetsAllPrerequisites.prototype.runPrerequisites = function (scripts) {
         return __awaiter(this, void 0, void 0, function () {
-            var answer;
+            var script;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4, this.canTryHardResetWithOrigin()];
+                    case 0:
+                        if (scripts.length === 0) {
+                            return [2];
+                        }
+                        script = scripts.shift();
+                        this.output.info("    running script \"" + script + "\", " + scripts.length + " are left.");
+                        return [4, this.runScript(script)];
                     case 1:
-                        answer = _a.sent();
-                        if (!(answer === 'yes')) return [3, 4];
-                        return [4, this.hardReset()];
-                    case 2:
                         _a.sent();
-                        return [4, this.execute()];
-                    case 3:
-                        _a.sent();
-                        return [3, 5];
-                    case 4:
-                        if (answer === 'skip') {
+                        this.output.ok("    script \"" + script + "\" successfully proceeded.");
+                        if (scripts.length > 0) {
+                            return [2, this.runPrerequisites(scripts)];
                         }
-                        else {
-                            throw new Error(this.getErrorMessage());
-                        }
-                        _a.label = 5;
-                    case 5: return [2];
+                        return [2];
                 }
             });
         });
     };
-    BranchUpToDateWithBaseBranch.prototype.printMergeError = function (e) {
-        this.printer.error(this.getErrorMessage());
-    };
-    BranchUpToDateWithBaseBranch.prototype.getErrorMessage = function () {
-        return "Branch " + this.branch + " cannot be merged with " + this.baseBranch + ".";
-    };
-    BranchUpToDateWithBaseBranch.prototype.canTryHardResetWithOrigin = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2, this.input.askUser("Cannot do fast forward merge with " + this.baseBranch + ". Can i try hard reset with origin? (yes/no/skip)")];
-            });
-        });
-    };
-    BranchUpToDateWithBaseBranch.prototype.hardReset = function () {
+    BranchMeetsAllPrerequisites.prototype.runScript = function (script) {
         return __awaiter(this, void 0, void 0, function () {
             var e_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 3, , 4]);
-                        return [4, this.git.hardResetWithOrigin(this.branch)];
+                        _a.trys.push([0, 2, , 4]);
+                        return [4, this.commandExecutor.exec(script)];
                     case 1:
                         _a.sent();
-                        return [4, this.git.mergeFastForward(this.baseBranch, this.branch)];
+                        return [3, 4];
                     case 2:
+                        e_2 = _a.sent();
+                        this.output.error(e_2.message);
+                        return [4, this.askForRetry(script)];
+                    case 3:
                         _a.sent();
                         return [3, 4];
-                    case 3:
-                        e_2 = _a.sent();
-                        this.printMergeError(e_2);
-                        throw new Error(this.getErrorMessage());
                     case 4: return [2];
                 }
             });
         });
     };
-    return BranchUpToDateWithBaseBranch;
+    BranchMeetsAllPrerequisites.prototype.askForRetry = function (script) {
+        return __awaiter(this, void 0, void 0, function () {
+            var answer;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, this.input.askUser('Do you want to run this script again? (yes/no/skip)')];
+                    case 1:
+                        answer = _a.sent();
+                        if (!(answer === 'yes')) return [3, 3];
+                        return [4, this.runScript(script)];
+                    case 2:
+                        _a.sent();
+                        return [3, 4];
+                    case 3:
+                        if (answer === 'skip') {
+                        }
+                        else {
+                            throw new Error("script \"" + script + "\" has not finished well.");
+                        }
+                        _a.label = 4;
+                    case 4: return [2];
+                }
+            });
+        });
+    };
+    return BranchMeetsAllPrerequisites;
 }());
-exports.BranchUpToDateWithBaseBranch = BranchUpToDateWithBaseBranch;
-//# sourceMappingURL=branch-up-to-date-with-base-branch.js.map
+exports.BranchMeetsAllPrerequisites = BranchMeetsAllPrerequisites;
+//# sourceMappingURL=branch-meets-all-prerequisites.js.map

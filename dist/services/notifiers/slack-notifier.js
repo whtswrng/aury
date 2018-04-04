@@ -42,13 +42,28 @@ var SlackNotifier = (function () {
         this.input = input;
         this.requester = requester;
     }
-    SlackNotifier.prototype.notifyAuthorAboutApprovedPullRequest = function (branch) {
+    SlackNotifier.prototype.notifyAuthorAboutReviewedPullRequest = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, this.notifyInfo(this.pullRequestAuthor, "Someone finished review of your pull request on branch " + this.branch + ".")];
+                    case 1:
+                        _a.sent();
+                        return [2];
+                }
+            });
+        });
+    };
+    SlackNotifier.prototype.setBranch = function (branch) {
+        this.branch = branch;
+    };
+    SlackNotifier.prototype.notifyAuthorAboutApprovedPullRequest = function () {
         return __awaiter(this, void 0, void 0, function () {
             var message;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        message = "Pull request on " + branch + " was approved.";
+                        message = "Pull request on " + this.branch + " was approved.";
                         return [4, this.notifySuccess(this.pullRequestAuthor, message)];
                     case 1:
                         _a.sent();
@@ -57,11 +72,11 @@ var SlackNotifier = (function () {
             });
         });
     };
-    SlackNotifier.prototype.notifyAuthorAboutStartingReview = function (branch) {
+    SlackNotifier.prototype.notifyAuthorAboutStartingReview = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4, this.notifyInfo(this.pullRequestAuthor, "Just letting you know that someone is working on your pull request on branch " + branch + ".")];
+                    case 0: return [4, this.notifyInfo(this.pullRequestAuthor, "Just letting you know that someone is working on your pull request on branch " + this.branch + ".")];
                     case 1:
                         _a.sent();
                         return [2];
@@ -69,7 +84,7 @@ var SlackNotifier = (function () {
             });
         });
     };
-    SlackNotifier.prototype.notifyAuthorAboutDeniedPullRequest = function (branch, message) {
+    SlackNotifier.prototype.notifyAuthorAboutDeniedPullRequest = function (message) {
         return __awaiter(this, void 0, void 0, function () {
             var additionalMessage;
             return __generator(this, function (_a) {

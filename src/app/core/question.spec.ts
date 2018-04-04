@@ -35,7 +35,8 @@ describe('BaseQuestionRule', () => {
     beforeEach(() => {
         askUserStub = sinon.stub();
         mockInput = {
-            askUser: askUserStub
+            askUser: askUserStub,
+            askUserForAction: sinon.stub()
         };
         question = 'foo';
         questionRule = new SpecificAskAndAnswerRule(mockInput, question);
