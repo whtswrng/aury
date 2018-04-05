@@ -46,8 +46,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var InquirerQuestionParser = (function () {
-    function InquirerQuestionParser(inquirer) {
+    function InquirerQuestionParser(inquirer, output) {
         this.inquirer = inquirer;
+        this.output = output;
     }
     InquirerQuestionParser.prototype.process = function (questions) {
         return __awaiter(this, void 0, void 0, function () {
@@ -95,19 +96,54 @@ var InquirerQuestionParser = (function () {
                         return [4, this.inquirer.prompt([this.transformConfirmQuestion(question)])];
                     case 1:
                         answer = _a.sent();
-                        this.assertAnswer(answer, question);
-                        return [4, this.processConfirmQuestions(questions)];
+                        return [4, this.assertAnswer(answer)];
                     case 2:
+                        _a.sent();
+                        return [4, this.processConfirmQuestions(questions)];
+                    case 3:
                         _a.sent();
                         return [2];
                 }
             });
         });
     };
-    InquirerQuestionParser.prototype.assertAnswer = function (answer, question) {
+    InquirerQuestionParser.prototype.assertAnswer = function (answer) {
+        return __awaiter(this, void 0, void 0, function () {
+            var answer_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!!answer.confirm) return [3, 2];
+                        this.output.separate();
+                        return [4, this.askForContinueWithReview()];
+                    case 1:
+                        answer_1 = _a.sent();
+                        this.output.separate();
+                        this.assertContinueWithReview(answer_1);
+                        _a.label = 2;
+                    case 2: return [2];
+                }
+            });
+        });
+    };
+    InquirerQuestionParser.prototype.assertContinueWithReview = function (answer) {
         if (!answer.confirm) {
-            throw new Error("Answer on question \"" + question + "\" was no.");
+            throw new Error("Review was stopped by user.");
         }
+    };
+    InquirerQuestionParser.prototype.askForContinueWithReview = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, this.inquirer.prompt([{
+                                type: 'confirm',
+                                name: 'confirm',
+                                message: 'Do you want to continue with review?'
+                            }])];
+                    case 1: return [2, _a.sent()];
+                }
+            });
+        });
     };
     InquirerQuestionParser.prototype.processListQuestions = function (question) {
         return __awaiter(this, void 0, void 0, function () {
@@ -153,7 +189,7 @@ var InquirerQuestionParser = (function () {
     InquirerQuestionParser.prototype.assertConfirmQuestionsAreValid = function (questions) {
         questions.forEach(function (question) {
             if (typeof question !== 'string') {
-                throw new IncorrectFormatError("Incorrect format, object expected, " + typeof questions + " given");
+                throw new IncorrectFormatError("Incorrect format, string expected, " + typeof question + " given: " + JSON.stringify(question, null, 2));
             }
         });
     };

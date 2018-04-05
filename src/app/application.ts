@@ -26,8 +26,10 @@ export class Application {
         await this.notifyUserIfGitStatusIsNotClean();
         this.handleForceQuit(currentCommitHash);
 
-        if(process.argv[2] === '--pre') {
+        if (process.argv[2] === '--pre') {
             await this.checkPrerequisites();
+        } else if (process.argv[2] === '--que') {
+            await this.checkQuestions();
         } else {
             await this.startProcessing(currentCommitHash);
         }
@@ -44,7 +46,15 @@ export class Application {
     private async checkPrerequisites() {
         try {
             await this.assertBranchMeetsAllPrerequisites();
-        } catch (e) {}
+        } catch (e) {
+        }
+    }
+
+    private async checkQuestions() {
+        try {
+            await this.assertBranchMeetsAllQuestions();
+        } catch (e) {
+        }
     }
 
     private async startProcessing(currentCommitHash: string) {
@@ -109,7 +119,7 @@ export class Application {
     }
 
     private getQuestions(): Array<string> | ListQuestion {
-        if(this.config && this.config.questions) {
+        if (this.config && this.config.questions) {
             return this.config.questions;
         }
 
@@ -117,7 +127,7 @@ export class Application {
     }
 
     private getPrerequisites(): Array<string> {
-        if(this.config && this.config.prerequisites) {
+        if (this.config && this.config.prerequisites) {
             return this.config.prerequisites;
         }
 

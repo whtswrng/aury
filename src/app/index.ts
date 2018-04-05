@@ -45,15 +45,16 @@ async function start() {
         initStorageDirectory();
         await startJourney();
     } catch (e) {
+        console.error(e);
     }
 }
 
 async function initDependencies() {
     const stringColorizer: IStringColorizer = new StringColorizer();
-    git = new Git(new ChildProcessExecutor());
     output = new Console(stringColorizer);
+    git = new Git(new ChildProcessExecutor());
     input = new InquirerInput(inquirer, stringColorizer);
-    questionParser = new InquirerQuestionParser(inquirer);
+    questionParser = new InquirerQuestionParser(inquirer, output);
     statusStorage = new StatusStorage(STORAGE_DIR);
     reviewStorage = new ReviewStorage(STORAGE_DIR);
     notifier = instantiateNotifier(config);
@@ -64,7 +65,7 @@ async function initConfig() {
     try {
         config = await getConfig();
     } catch (e) {
-        output.log(`Configuration file '${CONFIG_FILE_NAME}' not found or it's corrupted.`);
+        console.error(`Configuration file '${CONFIG_FILE_NAME}' not found or it's corrupted.`);
         throw e;
     }
 }

@@ -78,12 +78,18 @@ var Application = (function () {
                         return [4, this.checkPrerequisites()];
                     case 3:
                         _a.sent();
-                        return [3, 6];
-                    case 4: return [4, this.startProcessing(currentCommitHash)];
+                        return [3, 8];
+                    case 4:
+                        if (!(process.argv[2] === '--que')) return [3, 6];
+                        return [4, this.checkQuestions()];
                     case 5:
                         _a.sent();
-                        _a.label = 6;
-                    case 6: return [2];
+                        return [3, 8];
+                    case 6: return [4, this.startProcessing(currentCommitHash)];
+                    case 7:
+                        _a.sent();
+                        _a.label = 8;
+                    case 8: return [2];
                 }
             });
         });
@@ -123,9 +129,28 @@ var Application = (function () {
             });
         });
     };
-    Application.prototype.startProcessing = function (currentCommitHash) {
+    Application.prototype.checkQuestions = function () {
         return __awaiter(this, void 0, void 0, function () {
             var e_2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4, this.assertBranchMeetsAllQuestions()];
+                    case 1:
+                        _a.sent();
+                        return [3, 3];
+                    case 2:
+                        e_2 = _a.sent();
+                        return [3, 3];
+                    case 3: return [2];
+                }
+            });
+        });
+    };
+    Application.prototype.startProcessing = function (currentCommitHash) {
+        return __awaiter(this, void 0, void 0, function () {
+            var e_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -153,8 +178,8 @@ var Application = (function () {
                         _a.sent();
                         return [3, 10];
                     case 8:
-                        e_2 = _a.sent();
-                        return [4, this.denyPullRequest(currentCommitHash, e_2)];
+                        e_3 = _a.sent();
+                        return [4, this.denyPullRequest(currentCommitHash, e_3)];
                     case 9:
                         _a.sent();
                         return [3, 10];
@@ -165,7 +190,7 @@ var Application = (function () {
     };
     Application.prototype.notifyUserIfGitStatusIsNotClean = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var e_3;
+            var e_4;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -175,7 +200,7 @@ var Application = (function () {
                         _a.sent();
                         return [3, 3];
                     case 2:
-                        e_3 = _a.sent();
+                        e_4 = _a.sent();
                         this.output.warning('Git status is not clean! Aury could be in trouble because of that!');
                         return [3, 3];
                     case 3: return [2];
@@ -317,7 +342,7 @@ var Application = (function () {
     };
     Application.prototype.restoreGitToPreviousState = function (commit) {
         return __awaiter(this, void 0, void 0, function () {
-            var e_4;
+            var e_5;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -330,7 +355,7 @@ var Application = (function () {
                         _a.sent();
                         return [3, 4];
                     case 3:
-                        e_4 = _a.sent();
+                        e_5 = _a.sent();
                         return [3, 4];
                     case 4: return [2];
                 }

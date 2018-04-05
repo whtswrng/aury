@@ -1,9 +1,10 @@
 import {Inquirer} from "inquirer";
 import {QuestionParser} from "./question-parser";
+import {IOutput} from "../input-output/output.interface";
 
 export class InquirerQuestionParser implements QuestionParser{
 
-    constructor(private inquirer: Inquirer) {
+    constructor(private inquirer: Inquirer, private output: IOutput) {
 
     }
 
@@ -28,14 +29,31 @@ export class InquirerQuestionParser implements QuestionParser{
     private async askQuestions(questions: Array<string>) {
         const question = questions.shift();
         const answer = await this.inquirer.prompt([this.transformConfirmQuestion(question) as any]) as Answer;
-        this.assertAnswer(answer, question);
+        await this.assertAnswer(answer);
         await this.processConfirmQuestions(questions);
     }
 
-    private assertAnswer(answer: Answer, question: string): void {
+    private async assertAnswer(answer: Answer): Promise<void> {
         if (!answer.confirm) {
-            throw new Error(`Answer on question "${question}" was no.`);
+            this.output.separate();
+            const answer = await this.askForContinueWithReview();
+            this.output.separate();
+            this.assertContinueWithReview(answer);
         }
+    }
+
+    private assertContinueWithReview(answer: any): void {
+        if (!answer.confirm) {
+            throw new Error(`Review was stopped by user.`);
+        }
+    }
+
+    private async askForContinueWithReview(): Promise<Answer> {
+        return await this.inquirer.prompt([{
+            type: 'confirm',
+            name: 'confirm',
+            message: 'Do you want to continue with review?'
+        }]) as Answer;
     }
 
     private async processListQuestions(question: ListQuestion) {
@@ -63,7 +81,7 @@ export class InquirerQuestionParser implements QuestionParser{
     private assertConfirmQuestionsAreValid(questions: Array<string>): void {
         questions.forEach((question) => {
             if(typeof question !== 'string') {
-                throw new IncorrectFormatError(`Incorrect format, object expected, ${typeof questions} given`);
+                throw new IncorrectFormatError(`Incorrect format, string expected, ${typeof question} given: ${JSON.stringify(question, null, 2)}`);
             }
         });
     }

@@ -84,6 +84,7 @@ function start() {
                     return [3, 5];
                 case 4:
                     e_1 = _a.sent();
+                    console.error(e_1);
                     return [3, 5];
                 case 5: return [2];
             }
@@ -95,10 +96,10 @@ function initDependencies() {
         var stringColorizer;
         return __generator(this, function (_a) {
             stringColorizer = new string_colorizer_1.StringColorizer();
-            git = new git_1.Git(new child_process_executor_1.ChildProcessExecutor());
             output = new console_1.Console(stringColorizer);
+            git = new git_1.Git(new child_process_executor_1.ChildProcessExecutor());
             input = new inquirer_input_1.InquirerInput(inquirer, stringColorizer);
-            questionParser = new inquirer_question_parser_1.InquirerQuestionParser(inquirer);
+            questionParser = new inquirer_question_parser_1.InquirerQuestionParser(inquirer, output);
             statusStorage = new status_storage_1.StatusStorage(STORAGE_DIR);
             reviewStorage = new review_storage_1.ReviewStorage(STORAGE_DIR);
             notifier = instantiateNotifier(config);
@@ -120,7 +121,7 @@ function initConfig() {
                     return [3, 3];
                 case 2:
                     e_2 = _a.sent();
-                    output.log("Configuration file '" + CONFIG_FILE_NAME + "' not found or it's corrupted.");
+                    console.error("Configuration file '" + CONFIG_FILE_NAME + "' not found or it's corrupted.");
                     throw e_2;
                 case 3: return [2];
             }
