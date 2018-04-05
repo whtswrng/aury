@@ -37,10 +37,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var SLACK_POST_MESSAGE_URL = 'https://slack.com/api/chat.postMessage';
 var SlackNotifier = (function () {
-    function SlackNotifier(token, input, requester) {
+    function SlackNotifier(token, input, httpClient) {
         this.token = token;
         this.input = input;
-        this.requester = requester;
+        this.httpClient = httpClient;
     }
     SlackNotifier.prototype.notifyAuthorAboutReviewedPullRequest = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -122,7 +122,7 @@ var SlackNotifier = (function () {
             text: ":white_check_mark: " + message
         };
         try {
-            return this.requester.post(SLACK_POST_MESSAGE_URL, payload);
+            return this.httpClient.post(SLACK_POST_MESSAGE_URL, payload);
         }
         catch (e) {
             console.log(e);
@@ -137,7 +137,7 @@ var SlackNotifier = (function () {
                 "on github or the reviewer will contact you. :c"
         };
         try {
-            return this.requester.post(SLACK_POST_MESSAGE_URL, payload);
+            return this.httpClient.post(SLACK_POST_MESSAGE_URL, payload);
         }
         catch (e) {
             console.log(e);
@@ -151,7 +151,7 @@ var SlackNotifier = (function () {
             text: ":information_source: " + message
         };
         try {
-            return this.requester.post(SLACK_POST_MESSAGE_URL, payload);
+            return this.httpClient.post(SLACK_POST_MESSAGE_URL, payload);
         }
         catch (e) {
             console.log(e);

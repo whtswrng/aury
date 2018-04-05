@@ -50,13 +50,13 @@ async function start() {
 
 async function initDependencies() {
     const stringColorizer: IStringColorizer = new StringColorizer();
-    notifier = instantiateNotifier(config);
     git = new Git(new ChildProcessExecutor());
     output = new Console(stringColorizer);
     input = new InquirerInput(inquirer, stringColorizer);
     questionParser = new InquirerQuestionParser(inquirer);
     statusStorage = new StatusStorage(STORAGE_DIR);
     reviewStorage = new ReviewStorage(STORAGE_DIR);
+    notifier = instantiateNotifier(config);
     finalStage = instantiateFinalStageHook();
 }
 

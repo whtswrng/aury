@@ -9,7 +9,7 @@ export class SlackNotifier implements INotifier {
     private pullRequestAuthor: string;
     private branch: string;
 
-    constructor(private token: string, private input: IInput, private requester: HttpClient) {
+    constructor(private token: string, private input: IInput, private httpClient: HttpClient) {
 
     }
 
@@ -59,7 +59,7 @@ export class SlackNotifier implements INotifier {
         };
 
         try {
-            return this.requester.post(SLACK_POST_MESSAGE_URL, payload);
+            return this.httpClient.post(SLACK_POST_MESSAGE_URL, payload);
         } catch (e) {
             console.log(e);
             throw e;
@@ -75,7 +75,7 @@ export class SlackNotifier implements INotifier {
         };
 
         try {
-            return this.requester.post(SLACK_POST_MESSAGE_URL, payload);
+            return this.httpClient.post(SLACK_POST_MESSAGE_URL, payload);
         } catch (e) {
             console.log(e);
             throw e;
@@ -90,7 +90,7 @@ export class SlackNotifier implements INotifier {
         };
 
         try {
-            return this.requester.post(SLACK_POST_MESSAGE_URL, payload);
+            return this.httpClient.post(SLACK_POST_MESSAGE_URL, payload);
         } catch (e) {
             console.log(e);
             throw e;

@@ -10,14 +10,14 @@ import {ListQuestion} from "./services/question-parser/inquirer-question-parser"
 import {QuestionParser} from "./services/question-parser/question-parser";
 import {BranchUpToDateWithBaseBranch} from "./core/branch-up-to-date-with-base-branch";
 import {BranchMeetsAllPrerequisites} from "./core/branch-meets-all-prerequisites";
-import {FinalStageHook} from "./core/final-stage-hook";
+import {FinalActionHook, FinalStageHook} from "./core/final-stage-hook";
 import {AsyncHook} from "async_hooks";
 
 export class Application {
 
     constructor(private input: IInput, private output: IOutput, private git: Git, private config: IConfig,
                 private statusStorage: StatusStorage, private reviewStorage: ReviewStorage, private notifier: INotifier,
-                private questionParser: QuestionParser, private finalStage: AsyncHook) {
+                private questionParser: QuestionParser, private finalStage: FinalActionHook) {
     }
 
     public async start() {
@@ -138,9 +138,7 @@ export class Application {
 
     private async denyPullRequest(currentCommitHash: string, e) {
         await this.finalStage.finish();
-        const errorMessage = `Pull request on branch ${this.getBranch()} was denied.`;
         await this.restoreGitToPreviousState(currentCommitHash);
-        this.output.error(errorMessage);
     }
 
     private async restoreGitToPreviousState(commit) {
@@ -154,8 +152,6 @@ export class Application {
 
     private async finishReview() {
         await this.finalStage.finish();
-        const message = `Pull request on branch ${this.getBranch()} was reviewed.`;
-        this.output.ok(`\n${message}`);
     }
 
 }

@@ -95,13 +95,13 @@ function initDependencies() {
         var stringColorizer;
         return __generator(this, function (_a) {
             stringColorizer = new string_colorizer_1.StringColorizer();
-            notifier = instantiateNotifier(config);
             git = new git_1.Git(new child_process_executor_1.ChildProcessExecutor());
             output = new console_1.Console(stringColorizer);
             input = new inquirer_input_1.InquirerInput(inquirer, stringColorizer);
             questionParser = new inquirer_question_parser_1.InquirerQuestionParser(inquirer);
             statusStorage = new status_storage_1.StatusStorage(STORAGE_DIR);
             reviewStorage = new review_storage_1.ReviewStorage(STORAGE_DIR);
+            notifier = instantiateNotifier(config);
             finalStage = instantiateFinalStageHook();
             return [2];
         });

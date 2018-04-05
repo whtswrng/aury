@@ -296,17 +296,14 @@ var Application = (function () {
     };
     Application.prototype.denyPullRequest = function (currentCommitHash, e) {
         return __awaiter(this, void 0, void 0, function () {
-            var errorMessage;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4, this.finalStage.finish()];
                     case 1:
                         _a.sent();
-                        errorMessage = "Pull request on branch " + this.getBranch() + " was denied.";
                         return [4, this.restoreGitToPreviousState(currentCommitHash)];
                     case 2:
                         _a.sent();
-                        this.output.error(errorMessage);
                         return [2];
                 }
             });
@@ -336,14 +333,11 @@ var Application = (function () {
     };
     Application.prototype.finishReview = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var message;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4, this.finalStage.finish()];
                     case 1:
                         _a.sent();
-                        message = "Pull request on branch " + this.getBranch() + " was reviewed.";
-                        this.output.ok("\n" + message);
                         return [2];
                 }
             });
