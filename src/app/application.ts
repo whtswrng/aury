@@ -96,8 +96,8 @@ export class Application {
     }
 
     private async checkAllRules() {
-        // await this.assertBranchIsMergeableWithBaseBranch();
-        // await this.assertBranchMeetsAllPrerequisites();
+        await this.assertBranchIsMergeableWithBaseBranch();
+        await this.assertBranchMeetsAllPrerequisites();
         await this.assertBranchMeetsAllQuestions();
     }
 
