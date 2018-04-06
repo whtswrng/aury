@@ -52,6 +52,7 @@ var simple_http_client_1 = require("./services/clients/simple-http-client");
 var inquirer_input_1 = require("./services/input-output/inquirer-input");
 var final_stage_hook_1 = require("./core/final-stage-hook");
 var dummy_final_stage_hook_1 = require("./core/dummy-final-stage-hook");
+var help_1 = require("./services/help/help");
 var CONFIG_FILE_NAME = 'aury.config.json';
 var STORAGE_DIR = '.aury';
 var finalStage;
@@ -138,40 +139,56 @@ function startJourney() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (!(process.argv[2] === '--status')) return [3, 2];
-                    return [4, printStatus()];
+                    if (!(process.argv[2] === '--help')) return [3, 2];
+                    return [4, printHelp()];
                 case 1:
                     _a.sent();
-                    return [3, 11];
+                    return [3, 13];
                 case 2:
-                    if (!(process.argv[2] === '--reviews')) return [3, 4];
-                    return [4, printReviews()];
+                    if (!(process.argv[2] === '--status')) return [3, 4];
+                    return [4, printStatus()];
                 case 3:
                     _a.sent();
-                    return [3, 11];
+                    return [3, 13];
                 case 4:
-                    if (!(process.argv[2] === '--delete')) return [3, 6];
-                    return [4, deleteReview(process.argv[3], process.argv[4])];
+                    if (!(process.argv[2] === '--reviews')) return [3, 6];
+                    return [4, printReviews()];
                 case 5:
                     _a.sent();
-                    return [3, 11];
+                    return [3, 13];
                 case 6:
-                    if (!(process.argv[2] === '--add')) return [3, 8];
-                    return [4, addPendingReview(process.argv[3], process.argv[4], process.argv[5])];
+                    if (!(process.argv[2] === '--delete')) return [3, 8];
+                    return [4, deleteReview(process.argv[3], process.argv[4])];
                 case 7:
                     _a.sent();
-                    return [3, 11];
+                    return [3, 13];
                 case 8:
-                    if (!hasBranchesInArguments()) return [3, 10];
-                    return [4, startApplication()];
+                    if (!(process.argv[2] === '--add')) return [3, 10];
+                    return [4, addPendingReview(process.argv[3], process.argv[4], process.argv[5])];
                 case 9:
                     _a.sent();
-                    return [3, 11];
+                    return [3, 13];
                 case 10:
+                    if (!hasBranchesInArguments()) return [3, 12];
+                    return [4, startApplication()];
+                case 11:
+                    _a.sent();
+                    return [3, 13];
+                case 12:
                     output.log('You have to insert branches in format `aury $BRANCH $BASE_BRANCH` or insert command.');
-                    _a.label = 11;
-                case 11: return [2];
+                    _a.label = 13;
+                case 13: return [2];
             }
+        });
+    });
+}
+function printHelp() {
+    return __awaiter(this, void 0, void 0, function () {
+        var help;
+        return __generator(this, function (_a) {
+            help = new help_1.Help(output);
+            help.print();
+            return [2];
         });
     });
 }

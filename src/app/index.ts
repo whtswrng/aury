@@ -21,6 +21,7 @@ import {SimpleHttpClient} from "./services/clients/simple-http-client";
 import {InquirerInput} from "./services/input-output/inquirer-input";
 import {FinalActionHook, FinalStageHook} from "./core/final-stage-hook";
 import {DummyFinalStageHook} from "./core/dummy-final-stage-hook";
+import {Help} from "./services/help/help";
 
 const CONFIG_FILE_NAME = 'aury.config.json';
 const STORAGE_DIR = '.aury';
@@ -77,7 +78,9 @@ function initStorageDirectory() {
 }
 
 async function startJourney() {
-    if (process.argv[2] === '--status') {
+    if(process.argv[2] === '--help') {
+        await printHelp();
+    } else if (process.argv[2] === '--status') {
         await printStatus();
     } else if (process.argv[2] === '--reviews') {
         await printReviews();
@@ -90,6 +93,11 @@ async function startJourney() {
     } else {
         output.log('You have to insert branches in format `aury $BRANCH $BASE_BRANCH` or insert command.');
     }
+}
+
+async function printHelp() {
+    const help = new Help(output);
+    help.print();
 }
 
 async function addPendingReview(branch: string, baseBranch: string, description?: string) {
