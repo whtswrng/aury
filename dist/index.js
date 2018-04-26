@@ -189,7 +189,7 @@ function startJourney() {
                     _a.sent();
                     return [3, 19];
                 case 16:
-                    if (!hasBranchesInArguments()) return [3, 18];
+                    if (!hasDefinedBranches()) return [3, 18];
                     return [4, startApplication()];
                 case 17:
                     _a.sent();
@@ -343,8 +343,8 @@ function startApplication() {
         });
     });
 }
-function hasBranchesInArguments() {
-    return typeof process.argv[2] === 'string' && (typeof process.argv[3] === 'string' || config.baseBranch);
+function hasDefinedBranches() {
+    return typeof process.argv[2] === 'string' && config.baseBranch;
 }
 function getConfig() {
     return __awaiter(this, void 0, void 0, function () {

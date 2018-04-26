@@ -95,11 +95,11 @@ export class Application {
     }
 
     private getBaseBranch(): string {
-        return process.argv[3] || this.config.baseBranch;
+        return this.config.baseBranch;
     }
 
     private getDescription(): string {
-        return process.argv[4];
+        return process.argv[3] || 'no description';
     }
 
     private async checkIfGitStatusIsClean() {

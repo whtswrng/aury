@@ -243,10 +243,10 @@ var Application = (function () {
         return process.argv[2];
     };
     Application.prototype.getBaseBranch = function () {
-        return process.argv[3] || this.config.baseBranch;
+        return this.config.baseBranch;
     };
     Application.prototype.getDescription = function () {
-        return process.argv[4];
+        return process.argv[3] || 'no description';
     };
     Application.prototype.checkIfGitStatusIsClean = function () {
         return __awaiter(this, void 0, void 0, function () {

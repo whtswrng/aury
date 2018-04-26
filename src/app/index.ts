@@ -99,7 +99,7 @@ async function startJourney() {
         await deleteAllReviews();
     } else if (process.argv[2] === '--add') {
         await addPendingReview(process.argv[3], process.argv[4], process.argv[5]);
-    } else if (hasBranchesInArguments()) {
+    } else if (hasDefinedBranches()) {
         await startApplication();
     } else {
         printHelp();
@@ -169,8 +169,8 @@ async function startApplication() {
     }
 }
 
-function hasBranchesInArguments() {
-    return typeof process.argv[2] === 'string' && (typeof process.argv[3] === 'string' || config.baseBranch);
+function hasDefinedBranches() {
+    return typeof process.argv[2] === 'string' && config.baseBranch;
 }
 
 async function getConfig(): Promise<IConfig> {
