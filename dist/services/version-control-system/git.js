@@ -60,17 +60,23 @@ var Git = (function () {
     };
     Git.prototype.getCurrentCommitHash = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var e_2;
+            var branch, e_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 2, , 3]);
+                        _a.trys.push([0, 5, , 6]);
+                        return [4, this.commandExecutor.exec('git rev-parse --abbrev-ref HEAD')];
+                    case 1:
+                        branch = _a.sent();
+                        if (!(branch === 'HEAD')) return [3, 3];
                         return [4, this.commandExecutor.exec("git rev-parse HEAD")];
-                    case 1: return [2, _a.sent()];
-                    case 2:
+                    case 2: return [2, _a.sent()];
+                    case 3: return [2, branch];
+                    case 4: return [3, 6];
+                    case 5:
                         e_2 = _a.sent();
                         throw new Error("Something went wrong while getting a commit hash. " + e_2);
-                    case 3: return [2];
+                    case 6: return [2];
                 }
             });
         });

@@ -4,6 +4,12 @@ import {HttpClient} from "../clients/simple-http-client.interface";
 
 const SLACK_POST_MESSAGE_URL = 'https://slack.com/api/chat.postMessage';
 
+export interface SlackPayload {
+    token: string;
+    channel: string;
+    text: string;
+}
+
 export class SlackNotifier implements INotifier {
 
     private pullRequestAuthor: string;
@@ -52,11 +58,7 @@ export class SlackNotifier implements INotifier {
     }
 
     private notifySuccess(user, message: string): Promise<void> {
-        const payload = {
-            token: this.token,
-            channel: `@${user}`,
-            text: `:white_check_mark: ${message}`
-        };
+        const payload = this.createPayload(user, `:white_check_mark: ${message}`);
 
         try {
             return this.httpClient.post(SLACK_POST_MESSAGE_URL, payload);
@@ -67,12 +69,11 @@ export class SlackNotifier implements INotifier {
     }
 
     private notifyError(user, message: string): Promise<void> {
-        const payload = {
-            token: this.token,
-            channel: `@${user}`,
-            text: `:red_circle: ${message}. I am sure there are more information about the state of pull request` +
+        const payload = this.createPayload(
+            user,
+            `:red_circle: ${message}. I am sure there are more information about the state of pull request` +
                 `on github or the reviewer will contact you. :c`
-        };
+        );
 
         try {
             return this.httpClient.post(SLACK_POST_MESSAGE_URL, payload);
@@ -83,17 +84,21 @@ export class SlackNotifier implements INotifier {
     }
 
     private async notifyInfo(user, message: string): Promise<void> {
-        const payload = {
-            token: this.token,
-            channel: `@${user}`,
-            text: `:information_source: ${message}`
-        };
+        const payload = this.createPayload(user, `:information_source: ${message}`);
 
         const response = await this.httpClient.post(SLACK_POST_MESSAGE_URL, payload);
 
         if(!response.ok) {
             throw new Error('User not found.');
         }
+    }
+
+    private createPayload(user: string, text: string): SlackPayload {
+        return {
+            token: this.token,
+            channel: `@${user}`,
+            text: text
+        };
     }
 
 }

@@ -45,6 +45,7 @@ export class Application {
     private handleForceQuit(currentCommitHash: string) {
         process.on('SIGINT', async () => {
             this.output.warning('\nReseting git to previous state.');
+            console.log(currentCommitHash);
             await this.restoreGitToPreviousState(currentCommitHash);
             process.exit();
         });
@@ -158,6 +159,7 @@ export class Application {
             await this.git.abortMerge();
             await this.git.checkoutTo(commit);
         } catch (e) {
+            await this.git.checkoutTo(commit);
             // let git handle this problem
         }
     }

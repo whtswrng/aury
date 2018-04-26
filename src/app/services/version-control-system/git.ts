@@ -18,7 +18,13 @@ export class Git {
 
     async getCurrentCommitHash() {
         try {
-            return await this.commandExecutor.exec(`git rev-parse HEAD`);
+            const branch = await this.commandExecutor.exec('git rev-parse --abbrev-ref HEAD');
+
+            if(branch === 'HEAD') {
+                return await this.commandExecutor.exec(`git rev-parse HEAD`);
+            } else {
+                return branch;
+            }
         } catch (e) {
             throw new Error(`Something went wrong while getting a commit hash. ${e}`);
         }

@@ -127,6 +127,7 @@ var Application = (function () {
                 switch (_a.label) {
                     case 0:
                         this.output.warning('\nReseting git to previous state.');
+                        console.log(currentCommitHash);
                         return [4, this.restoreGitToPreviousState(currentCommitHash)];
                     case 1:
                         _a.sent();
@@ -357,18 +358,21 @@ var Application = (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 3, , 4]);
+                        _a.trys.push([0, 3, , 5]);
                         return [4, this.git.abortMerge()];
                     case 1:
                         _a.sent();
                         return [4, this.git.checkoutTo(commit)];
                     case 2:
                         _a.sent();
-                        return [3, 4];
+                        return [3, 5];
                     case 3:
                         e_6 = _a.sent();
-                        return [3, 4];
-                    case 4: return [2];
+                        return [4, this.git.checkoutTo(commit)];
+                    case 4:
+                        _a.sent();
+                        return [3, 5];
+                    case 5: return [2];
                 }
             });
         });

@@ -116,11 +116,7 @@ var SlackNotifier = (function () {
         });
     };
     SlackNotifier.prototype.notifySuccess = function (user, message) {
-        var payload = {
-            token: this.token,
-            channel: "@" + user,
-            text: ":white_check_mark: " + message
-        };
+        var payload = this.createPayload(user, ":white_check_mark: " + message);
         try {
             return this.httpClient.post(SLACK_POST_MESSAGE_URL, payload);
         }
@@ -130,12 +126,8 @@ var SlackNotifier = (function () {
         }
     };
     SlackNotifier.prototype.notifyError = function (user, message) {
-        var payload = {
-            token: this.token,
-            channel: "@" + user,
-            text: ":red_circle: " + message + ". I am sure there are more information about the state of pull request" +
-                "on github or the reviewer will contact you. :c"
-        };
+        var payload = this.createPayload(user, ":red_circle: " + message + ". I am sure there are more information about the state of pull request" +
+            "on github or the reviewer will contact you. :c");
         try {
             return this.httpClient.post(SLACK_POST_MESSAGE_URL, payload);
         }
@@ -150,24 +142,24 @@ var SlackNotifier = (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        payload = {
-                            token: this.token,
-                            channel: "@" + user,
-                            text: ":information_source: " + message
-                        };
+                        payload = this.createPayload(user, ":information_source: " + message);
                         return [4, this.httpClient.post(SLACK_POST_MESSAGE_URL, payload)];
                     case 1:
                         response = _a.sent();
-                        this.assertResponseIsOK(response);
+                        if (!response.ok) {
+                            throw new Error('User not found.');
+                        }
                         return [2];
                 }
             });
         });
     };
-    SlackNotifier.prototype.assertResponseIsOK = function (response) {
-        if (!response.ok) {
-            throw new Error('User not found.');
-        }
+    SlackNotifier.prototype.createPayload = function (user, text) {
+        return {
+            token: this.token,
+            channel: "@" + user,
+            text: text
+        };
     };
     return SlackNotifier;
 }());
