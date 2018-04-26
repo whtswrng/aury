@@ -143,41 +143,47 @@ function startJourney() {
                     return [4, printHelp()];
                 case 1:
                     _a.sent();
-                    return [3, 13];
+                    return [3, 15];
                 case 2:
                     if (!(process.argv[2] === '--status')) return [3, 4];
                     return [4, printStatus()];
                 case 3:
                     _a.sent();
-                    return [3, 13];
+                    return [3, 15];
                 case 4:
                     if (!(process.argv[2] === '--reviews')) return [3, 6];
                     return [4, printReviews()];
                 case 5:
                     _a.sent();
-                    return [3, 13];
+                    return [3, 15];
                 case 6:
                     if (!(process.argv[2] === '--delete')) return [3, 8];
                     return [4, deleteReview(process.argv[3], process.argv[4])];
                 case 7:
                     _a.sent();
-                    return [3, 13];
+                    return [3, 15];
                 case 8:
-                    if (!(process.argv[2] === '--add')) return [3, 10];
-                    return [4, addPendingReview(process.argv[3], process.argv[4], process.argv[5])];
+                    if (!(process.argv[2] === '--delete-all')) return [3, 10];
+                    return [4, deleteAllReviews()];
                 case 9:
                     _a.sent();
-                    return [3, 13];
+                    return [3, 15];
                 case 10:
-                    if (!hasBranchesInArguments()) return [3, 12];
-                    return [4, startApplication()];
+                    if (!(process.argv[2] === '--add')) return [3, 12];
+                    return [4, addPendingReview(process.argv[3], process.argv[4], process.argv[5])];
                 case 11:
                     _a.sent();
-                    return [3, 13];
+                    return [3, 15];
                 case 12:
-                    output.log('You have to insert branches in format `aury $BRANCH $BASE_BRANCH` or insert command.');
-                    _a.label = 13;
-                case 13: return [2];
+                    if (!hasBranchesInArguments()) return [3, 14];
+                    return [4, startApplication()];
+                case 13:
+                    _a.sent();
+                    return [3, 15];
+                case 14:
+                    printHelp();
+                    _a.label = 15;
+                case 15: return [2];
             }
         });
     });
@@ -213,6 +219,18 @@ function deleteReview(branch, baseBranch) {
                     _a.sent();
                     return [4, statusStorage.removeCodeReviewFromInPending(branch, baseBranch)];
                 case 2:
+                    _a.sent();
+                    return [2];
+            }
+        });
+    });
+}
+function deleteAllReviews() {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4, statusStorage.removeAllReviews()];
+                case 1:
                     _a.sent();
                     return [2];
             }

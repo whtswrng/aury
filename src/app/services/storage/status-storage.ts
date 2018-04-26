@@ -74,6 +74,15 @@ export class StatusStorage {
         }
     }
 
+    public async removeAllReviews(): Promise<void> {
+        const parsedContent = await this.getStatus();
+
+        parsedContent.pending = [];
+        parsedContent.inProgress = [];
+
+        await this.saveStatus(parsedContent);
+    }
+
     public async removeCodeReviewFromInPending(branch, baseBranch): Promise<void> {
         const parsedContent = await this.getStatus();
         const codeReviewIndex = await this.findExistingCodeReviewPendingIndex(branch, baseBranch);

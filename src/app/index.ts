@@ -86,12 +86,14 @@ async function startJourney() {
         await printReviews();
     } else if (process.argv[2] === '--delete') {
         await deleteReview(process.argv[3], process.argv[4]);
+    } else if (process.argv[2] === '--delete-all') {
+        await deleteAllReviews();
     } else if (process.argv[2] === '--add') {
         await addPendingReview(process.argv[3], process.argv[4], process.argv[5]);
     } else if (hasBranchesInArguments()) {
         await startApplication();
     } else {
-        output.log('You have to insert branches in format `aury $BRANCH $BASE_BRANCH` or insert command.');
+        printHelp();
     }
 }
 
@@ -107,6 +109,10 @@ async function addPendingReview(branch: string, baseBranch: string, description?
 async function deleteReview(branch: string, baseBranch: string) {
     await statusStorage.removeCodeReviewFromInProgress(branch, baseBranch);
     await statusStorage.removeCodeReviewFromInPending(branch, baseBranch);
+}
+
+async function deleteAllReviews() {
+    await statusStorage.removeAllReviews();
 }
 
 async function printStatus() {

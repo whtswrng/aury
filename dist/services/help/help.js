@@ -20,6 +20,7 @@ var Help = (function () {
         this.printOption('--reviews', '                print finished code reviews for current month');
         this.printOption('--add $BRANCH', '            add $BRANCH to pending code review');
         this.printOption('--delete $BRANCH', '         delete code review on $BRANCH from in progress or pending');
+        this.printOption('--delete-all', '             delete code review on $BRANCH from in progress or pending');
         this.printOption('--help', '                   print usage and options information');
     };
     Help.prototype.printOption = function (name, description) {
