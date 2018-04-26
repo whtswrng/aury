@@ -35,6 +35,7 @@ let reviewStorage: ReviewStorage;
 let questionParser: QuestionParser;
 let config: IConfig;
 let notifier: INotifier;
+let application: Application;
 
 
 start();
@@ -60,6 +61,10 @@ async function initDependencies() {
     reviewStorage = new ReviewStorage(STORAGE_DIR);
     notifier = instantiateNotifier(config);
     finalStage = instantiateFinalStageHook();
+
+    application = new Application(
+        input, output, git, config, statusStorage, reviewStorage, notifier, questionParser, finalStage
+    );
 }
 
 async function initConfig() {
@@ -82,6 +87,10 @@ async function startJourney() {
         await printHelp();
     } else if (process.argv[2] === '--status') {
         await printStatus();
+    } else if (process.argv[2] === '--pre') {
+        await application.checkPrerequisites();
+    } else if (process.argv[2] === '--que') {
+        await application.checkQuestions();
     } else if (process.argv[2] === '--reviews') {
         await printReviews();
     } else if (process.argv[2] === '--delete') {
@@ -154,10 +163,6 @@ async function printReviews() {
 
 async function startApplication() {
     try {
-        const application = new Application(
-            input, output, git, config, statusStorage, reviewStorage, notifier, questionParser, finalStage
-        );
-
         await application.start();
     } catch (e) {
         output.error(e.message);

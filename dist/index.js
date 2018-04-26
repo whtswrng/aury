@@ -64,6 +64,7 @@ var reviewStorage;
 var questionParser;
 var config;
 var notifier;
+var application;
 start();
 function start() {
     return __awaiter(this, void 0, void 0, function () {
@@ -105,6 +106,7 @@ function initDependencies() {
             reviewStorage = new review_storage_1.ReviewStorage(STORAGE_DIR);
             notifier = instantiateNotifier(config);
             finalStage = instantiateFinalStageHook();
+            application = new application_1.Application(input, output, git, config, statusStorage, reviewStorage, notifier, questionParser, finalStage);
             return [2];
         });
     });
@@ -143,47 +145,59 @@ function startJourney() {
                     return [4, printHelp()];
                 case 1:
                     _a.sent();
-                    return [3, 15];
+                    return [3, 19];
                 case 2:
                     if (!(process.argv[2] === '--status')) return [3, 4];
                     return [4, printStatus()];
                 case 3:
                     _a.sent();
-                    return [3, 15];
+                    return [3, 19];
                 case 4:
-                    if (!(process.argv[2] === '--reviews')) return [3, 6];
-                    return [4, printReviews()];
+                    if (!(process.argv[2] === '--pre')) return [3, 6];
+                    return [4, application.checkPrerequisites()];
                 case 5:
                     _a.sent();
-                    return [3, 15];
+                    return [3, 19];
                 case 6:
-                    if (!(process.argv[2] === '--delete')) return [3, 8];
-                    return [4, deleteReview(process.argv[3], process.argv[4])];
+                    if (!(process.argv[2] === '--que')) return [3, 8];
+                    return [4, application.checkQuestions()];
                 case 7:
                     _a.sent();
-                    return [3, 15];
+                    return [3, 19];
                 case 8:
-                    if (!(process.argv[2] === '--delete-all')) return [3, 10];
-                    return [4, deleteAllReviews()];
+                    if (!(process.argv[2] === '--reviews')) return [3, 10];
+                    return [4, printReviews()];
                 case 9:
                     _a.sent();
-                    return [3, 15];
+                    return [3, 19];
                 case 10:
-                    if (!(process.argv[2] === '--add')) return [3, 12];
-                    return [4, addPendingReview(process.argv[3], process.argv[4], process.argv[5])];
+                    if (!(process.argv[2] === '--delete')) return [3, 12];
+                    return [4, deleteReview(process.argv[3], process.argv[4])];
                 case 11:
                     _a.sent();
-                    return [3, 15];
+                    return [3, 19];
                 case 12:
-                    if (!hasBranchesInArguments()) return [3, 14];
-                    return [4, startApplication()];
+                    if (!(process.argv[2] === '--delete-all')) return [3, 14];
+                    return [4, deleteAllReviews()];
                 case 13:
                     _a.sent();
-                    return [3, 15];
+                    return [3, 19];
                 case 14:
+                    if (!(process.argv[2] === '--add')) return [3, 16];
+                    return [4, addPendingReview(process.argv[3], process.argv[4], process.argv[5])];
+                case 15:
+                    _a.sent();
+                    return [3, 19];
+                case 16:
+                    if (!hasBranchesInArguments()) return [3, 18];
+                    return [4, startApplication()];
+                case 17:
+                    _a.sent();
+                    return [3, 19];
+                case 18:
                     printHelp();
-                    _a.label = 15;
-                case 15: return [2];
+                    _a.label = 19;
+                case 19: return [2];
             }
         });
     });
@@ -311,12 +325,11 @@ function printReviews() {
 }
 function startApplication() {
     return __awaiter(this, void 0, void 0, function () {
-        var application, e_3;
+        var e_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    application = new application_1.Application(input, output, git, config, statusStorage, reviewStorage, notifier, questionParser, finalStage);
                     return [4, application.start()];
                 case 1:
                     _a.sent();

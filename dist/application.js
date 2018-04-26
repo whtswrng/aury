@@ -74,41 +74,13 @@ var Application = (function () {
                     case 2:
                         _a.sent();
                         this.handleForceQuit(currentCommitHash);
-                        if (!(process.argv[2] === '--pre')) return [3, 4];
-                        return [4, this.checkPrerequisites()];
+                        return [4, this.startProcessing(currentCommitHash)];
                     case 3:
                         _a.sent();
-                        return [3, 8];
-                    case 4:
-                        if (!(process.argv[2] === '--que')) return [3, 6];
-                        return [4, this.checkQuestions()];
-                    case 5:
-                        _a.sent();
-                        return [3, 8];
-                    case 6: return [4, this.startProcessing(currentCommitHash)];
-                    case 7:
-                        _a.sent();
-                        _a.label = 8;
-                    case 8: return [2];
-                }
-            });
-        });
-    };
-    Application.prototype.handleForceQuit = function (currentCommitHash) {
-        var _this = this;
-        process.on('SIGINT', function () { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        this.output.warning('\nReseting git to previous state.');
-                        return [4, this.restoreGitToPreviousState(currentCommitHash)];
-                    case 1:
-                        _a.sent();
-                        process.exit();
                         return [2];
                 }
             });
-        }); });
+        });
     };
     Application.prototype.checkPrerequisites = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -147,6 +119,22 @@ var Application = (function () {
                 }
             });
         });
+    };
+    Application.prototype.handleForceQuit = function (currentCommitHash) {
+        var _this = this;
+        process.on('SIGINT', function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        this.output.warning('\nReseting git to previous state.');
+                        return [4, this.restoreGitToPreviousState(currentCommitHash)];
+                    case 1:
+                        _a.sent();
+                        process.exit();
+                        return [2];
+                }
+            });
+        }); });
     };
     Application.prototype.startProcessing = function (currentCommitHash) {
         return __awaiter(this, void 0, void 0, function () {

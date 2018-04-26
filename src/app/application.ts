@@ -26,12 +26,20 @@ export class Application {
         await this.notifyUserIfGitStatusIsNotClean();
         this.handleForceQuit(currentCommitHash);
 
-        if (process.argv[2] === '--pre') {
-            await this.checkPrerequisites();
-        } else if (process.argv[2] === '--que') {
-            await this.checkQuestions();
-        } else {
-            await this.startProcessing(currentCommitHash);
+        await this.startProcessing(currentCommitHash);
+    }
+
+    public async checkPrerequisites() {
+        try {
+            await this.assertBranchMeetsAllPrerequisites();
+        } catch (e) {
+        }
+    }
+
+    public async checkQuestions() {
+        try {
+            await this.assertBranchMeetsAllQuestions();
+        } catch (e) {
         }
     }
 
@@ -41,20 +49,6 @@ export class Application {
             await this.restoreGitToPreviousState(currentCommitHash);
             process.exit();
         });
-    }
-
-    private async checkPrerequisites() {
-        try {
-            await this.assertBranchMeetsAllPrerequisites();
-        } catch (e) {
-        }
-    }
-
-    private async checkQuestions() {
-        try {
-            await this.assertBranchMeetsAllQuestions();
-        } catch (e) {
-        }
     }
 
     private async startProcessing(currentCommitHash: string) {
