@@ -10,8 +10,7 @@ import {ListQuestion} from "./services/question-parser/inquirer-question-parser"
 import {QuestionParser} from "./services/question-parser/question-parser";
 import {BranchUpToDateWithBaseBranch} from "./core/branch-up-to-date-with-base-branch";
 import {BranchMeetsAllPrerequisites} from "./core/branch-meets-all-prerequisites";
-import {FinalActionHook, FinalStageHook} from "./core/final-stage-hook";
-import {AsyncHook} from "async_hooks";
+import {FinalActionHook} from "./core/final-stage-hook";
 
 export class Application {
 
@@ -77,7 +76,16 @@ export class Application {
         await this.notifier.askOnPullRequestAuthor();
 
         if (!await this.statusStorage.isCodeReviewInProgress(this.getBranch(), this.getBaseBranch())) {
+            await this.notifyAuthorAboutStartingReview();
+        }
+    }
+
+    private async notifyAuthorAboutStartingReview(): Promise<void> {
+        try {
             await this.notifier.notifyAuthorAboutStartingReview();
+        } catch (e) {
+            this.output.error('User not found, please try again.');
+            await this.notifyAuthorAboutCodeReview();
         }
     }
 

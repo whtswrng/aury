@@ -206,10 +206,33 @@ var Application = (function () {
                         return [4, this.statusStorage.isCodeReviewInProgress(this.getBranch(), this.getBaseBranch())];
                     case 2:
                         if (!!(_a.sent())) return [3, 4];
-                        return [4, this.notifier.notifyAuthorAboutStartingReview()];
+                        return [4, this.notifyAuthorAboutStartingReview()];
                     case 3:
                         _a.sent();
                         _a.label = 4;
+                    case 4: return [2];
+                }
+            });
+        });
+    };
+    Application.prototype.notifyAuthorAboutStartingReview = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var e_5;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 4]);
+                        return [4, this.notifier.notifyAuthorAboutStartingReview()];
+                    case 1:
+                        _a.sent();
+                        return [3, 4];
+                    case 2:
+                        e_5 = _a.sent();
+                        this.output.error('User not found, please try again.');
+                        return [4, this.notifyAuthorAboutCodeReview()];
+                    case 3:
+                        _a.sent();
+                        return [3, 4];
                     case 4: return [2];
                 }
             });
@@ -330,7 +353,7 @@ var Application = (function () {
     };
     Application.prototype.restoreGitToPreviousState = function (commit) {
         return __awaiter(this, void 0, void 0, function () {
-            var e_5;
+            var e_6;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -343,7 +366,7 @@ var Application = (function () {
                         _a.sent();
                         return [3, 4];
                     case 3:
-                        e_5 = _a.sent();
+                        e_6 = _a.sent();
                         return [3, 4];
                     case 4: return [2];
                 }

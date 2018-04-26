@@ -82,18 +82,18 @@ export class SlackNotifier implements INotifier {
         }
     }
 
-    private notifyInfo(user, message: string): Promise<void> {
+    private async notifyInfo(user, message: string): Promise<void> {
         const payload = {
             token: this.token,
             channel: `@${user}`,
             text: `:information_source: ${message}`
         };
 
-        try {
-            return this.httpClient.post(SLACK_POST_MESSAGE_URL, payload);
-        } catch (e) {
-            console.log(e);
-            throw e;
+        const response = await this.httpClient.post(SLACK_POST_MESSAGE_URL, payload);
+
+        if(!response.ok) {
+            throw new Error('User not found.');
         }
     }
+
 }
