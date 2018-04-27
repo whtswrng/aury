@@ -52,7 +52,7 @@ var simple_http_client_1 = require("./services/clients/simple-http-client");
 var inquirer_input_1 = require("./services/input-output/inquirer-input");
 var final_stage_hook_1 = require("./core/final-stage-hook");
 var dummy_final_stage_hook_1 = require("./core/dummy-final-stage-hook");
-var help_1 = require("./services/help/help");
+var help_1 = require("./core/help/help");
 var CONFIG_FILE_NAME = 'aury.config.json';
 var STORAGE_DIR = '.aury';
 var finalStage;
@@ -117,16 +117,48 @@ function initConfig() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
+                    _a.trys.push([0, 2, , 6]);
                     return [4, getConfig()];
                 case 1:
                     config = _a.sent();
-                    return [3, 3];
+                    return [3, 6];
                 case 2:
                     e_2 = _a.sent();
-                    console.error("Configuration file '" + CONFIG_FILE_NAME + "' not found or it's corrupted.");
+                    if (!(process.argv[2] === '--init')) return [3, 4];
+                    return [4, createDefaultConfigFile()];
+                case 3:
+                    _a.sent();
+                    return [3, 5];
+                case 4:
+                    console.error("Configuration file '" + CONFIG_FILE_NAME + "' not found or it's corrupted. " +
+                        "Enter \"aury --init\" for creating a config file.");
                     throw e_2;
-                case 3: return [2];
+                case 5: return [3, 6];
+                case 6: return [2];
+            }
+        });
+    });
+}
+function createDefaultConfigFile() {
+    return __awaiter(this, void 0, void 0, function () {
+        var defaultConfigContent;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    defaultConfigContent = {
+                        prerequisites: [],
+                        baseBranch: "master",
+                        questions: [
+                            "Does the code in branch implement required feature or solved the problem?",
+                            "Does the code in branch have tests and testing the problem correctly?",
+                            "Does the code in branch have clean design and code?"
+                        ]
+                    };
+                    return [4, status_storage_1.createFileIfDoesNotExist(CONFIG_FILE_NAME, JSON.stringify(defaultConfigContent))];
+                case 1:
+                    _a.sent();
+                    console.log('Config file "aury.config.json" was created.');
+                    return [2];
             }
         });
     });
@@ -145,59 +177,66 @@ function startJourney() {
                     return [4, printHelp()];
                 case 1:
                     _a.sent();
-                    return [3, 19];
+                    return [3, 21];
                 case 2:
                     if (!(process.argv[2] === '--status')) return [3, 4];
                     return [4, printStatus()];
                 case 3:
                     _a.sent();
-                    return [3, 19];
+                    return [3, 21];
                 case 4:
                     if (!(process.argv[2] === '--pre')) return [3, 6];
                     return [4, application.checkPrerequisites()];
                 case 5:
                     _a.sent();
-                    return [3, 19];
+                    return [3, 21];
                 case 6:
                     if (!(process.argv[2] === '--que')) return [3, 8];
                     return [4, application.checkQuestions()];
                 case 7:
                     _a.sent();
-                    return [3, 19];
+                    return [3, 21];
                 case 8:
                     if (!(process.argv[2] === '--reviews')) return [3, 10];
                     return [4, printReviews()];
                 case 9:
                     _a.sent();
-                    return [3, 19];
+                    return [3, 21];
                 case 10:
                     if (!(process.argv[2] === '--delete')) return [3, 12];
                     return [4, deleteReview(process.argv[3], process.argv[4])];
                 case 11:
                     _a.sent();
-                    return [3, 19];
+                    return [3, 21];
                 case 12:
                     if (!(process.argv[2] === '--delete-all')) return [3, 14];
                     return [4, deleteAllReviews()];
                 case 13:
                     _a.sent();
-                    return [3, 19];
+                    return [3, 21];
                 case 14:
-                    if (!(process.argv[2] === '--add')) return [3, 16];
-                    return [4, addPendingReview(process.argv[3], process.argv[4], process.argv[5])];
+                    if (!(process.argv[2] === '--init')) return [3, 15];
+                    return [3, 21];
                 case 15:
-                    _a.sent();
-                    return [3, 19];
+                    if (!(process.argv[2] === '--add')) return [3, 17];
+                    return [4, addPendingReview(process.argv[3], process.argv[4], process.argv[5])];
                 case 16:
-                    if (!hasDefinedBranches()) return [3, 18];
-                    return [4, startApplication()];
-                case 17:
                     _a.sent();
-                    return [3, 19];
-                case 18:
+                    return [3, 21];
+                case 17:
+                    if (!process.argv[2].startsWith('--')) return [3, 18];
                     printHelp();
-                    _a.label = 19;
-                case 19: return [2];
+                    return [3, 21];
+                case 18:
+                    if (!hasDefinedBranches()) return [3, 20];
+                    return [4, startApplication()];
+                case 19:
+                    _a.sent();
+                    return [3, 21];
+                case 20:
+                    printHelp();
+                    _a.label = 21;
+                case 21: return [2];
             }
         });
     });

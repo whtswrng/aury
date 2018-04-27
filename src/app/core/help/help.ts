@@ -1,4 +1,4 @@
-import {IOutput} from "../input-output/output.interface";
+import {IOutput} from "../../services/input-output/output.interface";
 
 export class Help {
 

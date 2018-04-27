@@ -11,7 +11,7 @@ import {Console} from "./services/input-output/console";
 import {ChildProcessExecutor} from "./services/command-executor/child-process-executor";
 import {SlackNotifier} from "./services/notifiers/slack-notifier";
 import {INotifier} from "./services/notifiers/notifier.interface";
-import {readFilePromisified, StatusStorage} from "./services/storage/status-storage";
+import {readFilePromisified, createFileIfDoesNotExist, StatusStorage} from "./services/storage/status-storage";
 import {ReviewStorage} from "./services/storage/review-storage";
 import {DummyNotifier} from "./services/notifiers/dummy-notifier";
 import * as inquirer from 'inquirer';
@@ -21,7 +21,8 @@ import {SimpleHttpClient} from "./services/clients/simple-http-client";
 import {InquirerInput} from "./services/input-output/inquirer-input";
 import {FinalActionHook, FinalStageHook} from "./core/final-stage-hook";
 import {DummyFinalStageHook} from "./core/dummy-final-stage-hook";
-import {Help} from "./services/help/help";
+import {Help} from "./core/help/help";
+import Config = Chai.Config;
 
 const CONFIG_FILE_NAME = 'aury.config.json';
 const STORAGE_DIR = '.aury';
@@ -71,9 +72,29 @@ async function initConfig() {
     try {
         config = await getConfig();
     } catch (e) {
-        console.error(`Configuration file '${CONFIG_FILE_NAME}' not found or it's corrupted.`);
-        throw e;
+        if (process.argv[2] === '--init') {
+            await createDefaultConfigFile();
+        } else {
+            console.error(`Configuration file '${CONFIG_FILE_NAME}' not found or it's corrupted. ` +
+             `Enter "aury --init" for creating a config file.`
+            );
+            throw e;
+        }
     }
+}
+
+async function createDefaultConfigFile() {
+    const defaultConfigContent: IConfig = {
+        prerequisites: [],
+        baseBranch: "master",
+        questions: [
+            "Does the code in branch implement required feature or solved the problem?",
+            "Does the code in branch have tests and testing the problem correctly?",
+            "Does the code in branch have clean design and code?"
+        ]
+    };
+    await createFileIfDoesNotExist(CONFIG_FILE_NAME, JSON.stringify(defaultConfigContent));
+    console.log('Config file "aury.config.json" was created.');
 }
 
 function initStorageDirectory() {
@@ -97,8 +118,12 @@ async function startJourney() {
         await deleteReview(process.argv[3], process.argv[4]);
     } else if (process.argv[2] === '--delete-all') {
         await deleteAllReviews();
+    } else if (process.argv[2] === '--init') {
+
     } else if (process.argv[2] === '--add') {
         await addPendingReview(process.argv[3], process.argv[4], process.argv[5]);
+    } else if(process.argv[2].startsWith('--')) {
+        printHelp();
     } else if (hasDefinedBranches()) {
         await startApplication();
     } else {

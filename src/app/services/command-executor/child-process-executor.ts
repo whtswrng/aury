@@ -5,11 +5,11 @@ export class ChildProcessExecutor implements ICommandExecutor{
 
     public exec(command: string): Promise<string> {
         return new Promise((resolve, reject) => {
-            child.exec(command, (err, data) => {
+            child.exec(command, {maxBuffer: 1024 * 650}, (err, stdout, stderr) => {
                 if (err) {
-                    return reject(err);
+                    return reject(new Error(stderr || stdout || err.message));
                 }
-                resolve(data);
+                resolve(stdout);
             })
         });
     }

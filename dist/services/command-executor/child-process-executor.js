@@ -6,11 +6,11 @@ var ChildProcessExecutor = (function () {
     }
     ChildProcessExecutor.prototype.exec = function (command) {
         return new Promise(function (resolve, reject) {
-            child.exec(command, function (err, data) {
+            child.exec(command, { maxBuffer: 1024 * 650 }, function (err, stdout, stderr) {
                 if (err) {
-                    return reject(err);
+                    return reject(new Error(stderr || stdout || err.message));
                 }
-                resolve(data);
+                resolve(stdout);
             });
         });
     };

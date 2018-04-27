@@ -4,7 +4,7 @@ export interface IConfig {
     prerequisites: prerequisites;
     questions: Array<string> | ListQuestion;
     baseBranch: string;
-    tokens: {
+    tokens?: {
         slack: string;
     }
 }

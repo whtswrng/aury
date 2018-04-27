@@ -45,8 +45,8 @@ export class Application {
     private handleForceQuit(currentCommitHash: string) {
         process.on('SIGINT', async () => {
             this.output.warning('\nReseting git to previous state.');
-            console.log(currentCommitHash);
             await this.restoreGitToPreviousState(currentCommitHash);
+            this.output.warning('\n');
             process.exit();
         });
     }
@@ -150,7 +150,7 @@ export class Application {
     }
 
     private async denyPullRequest(currentCommitHash: string, e) {
-        await this.finalStage.finish();
+        await this.finishReview();
         await this.restoreGitToPreviousState(currentCommitHash);
     }
 
@@ -160,7 +160,6 @@ export class Application {
             await this.git.checkoutTo(commit);
         } catch (e) {
             await this.git.checkoutTo(commit);
-            // let git handle this problem
         }
     }
 

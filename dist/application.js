@@ -127,10 +127,10 @@ var Application = (function () {
                 switch (_a.label) {
                     case 0:
                         this.output.warning('\nReseting git to previous state.');
-                        console.log(currentCommitHash);
                         return [4, this.restoreGitToPreviousState(currentCommitHash)];
                     case 1:
                         _a.sent();
+                        this.output.warning('\n');
                         process.exit();
                         return [2];
                 }
@@ -341,7 +341,7 @@ var Application = (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4, this.finalStage.finish()];
+                    case 0: return [4, this.finishReview()];
                     case 1:
                         _a.sent();
                         return [4, this.restoreGitToPreviousState(currentCommitHash)];
