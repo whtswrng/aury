@@ -52,9 +52,16 @@ var InquirerQuestionParser = (function () {
     }
     InquirerQuestionParser.prototype.process = function (questions) {
         return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        process.on('SIGINT', function () { return __awaiter(_this, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                console.log('inqu sigint');
+                                return [2];
+                            });
+                        }); });
                         if (!Array.isArray(questions)) return [3, 2];
                         return [4, this.processConfirmQuestions(questions.slice())];
                     case 1:

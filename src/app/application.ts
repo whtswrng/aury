@@ -44,11 +44,15 @@ export class Application {
 
     private handleForceQuit(currentCommitHash: string) {
         process.on('SIGINT', async () => {
-            this.output.warning('\nReseting git to previous state.');
-            await this.restoreGitToPreviousState(currentCommitHash);
-            this.output.warning('\n');
-            process.exit();
+            console.log('siginint')
+            await this.forceQuit(currentCommitHash);
         });
+    }
+
+    private async forceQuit(currentCommitHash: string) {
+        await this.restoreGitToPreviousState(currentCommitHash);
+        this.output.log('\n');
+        process.exit();
     }
 
     private async startProcessing(currentCommitHash: string) {

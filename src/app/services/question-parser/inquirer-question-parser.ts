@@ -9,6 +9,9 @@ export class InquirerQuestionParser implements QuestionParser{
     }
 
     public async process(questions: Array<string> | ListQuestion): Promise<void> {
+        process.on('SIGINT', async () => {
+            console.log('inqu sigint')
+        });
         if(Array.isArray(questions)) {
             await this.processConfirmQuestions([...questions]);
         } else {
